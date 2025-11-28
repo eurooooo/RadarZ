@@ -1,6 +1,7 @@
 import requests
 from datetime import datetime, timedelta
 from typing import List, Dict, Optional
+from bs4 import BeautifulSoup
 
 class GitHubClient:
     def __init__(self, token: Optional[str] = None):
@@ -8,7 +9,7 @@ class GitHubClient:
         self.headers = {"Authorization": f"token {token}"} if token else {}
     
     def get_new_repositories(self, days: int = 7, min_stars: int = 10, 
-                            language: Optional[str] = None, limit: int = 50) -> List[Dict]:
+                            language: Optional[str] = None, limit: int = 10) -> List[Dict]:
         """获取新项目"""
         start_date = (datetime.now() - timedelta(days=days)).strftime("%Y-%m-%d")
         query = f"created:>{start_date} stars:>={min_stars}"
@@ -31,6 +32,47 @@ class GitHubClient:
             print(f"❌ 获取GitHub项目失败: {e}")
             return []
     
+    def get_trending_repositories(self, since: str = "daily", limit: int = 25) -> List[Dict]:
+        """从GitHub trending页面获取trending项目
+        
+        Args:
+            since: 时间范围，可选 "daily", "weekly", "monthly"
+            limit: 返回项目数量限制
+        """
+        try:
+            url = f"https://github.com/trending?since={since}"
+            res = requests.get(url, timeout=10)
+            res.raise_for_status()
+            html_text = res.text
+
+            soup = BeautifulSoup(html_text, "html.parser")
+            repo_elements = soup.select("h2.h3.lh-condensed")
+
+            repo_names = []
+            for element in repo_elements[:limit]:
+                a_tag = element.find("a")
+                if a_tag:
+                    href = a_tag.get("href", "").strip()
+                    repo_name = href[1:] if href.startswith("/") else href  # 去掉开头的 "/"
+                    repo_names.append(repo_name)
+
+            # 通过API获取详细信息
+            repos = []
+            for repo_name in repo_names:
+                try:
+                    api_url = f"https://api.github.com/repos/{repo_name}"
+                    response = requests.get(api_url, headers=self.headers, timeout=5)
+                    if response.status_code == 200:
+                        repos.append(response.json())
+                except Exception as e:
+                    print(f"⚠️ 获取 {repo_name} 详情失败: {e}")
+                    continue
+
+            return repos
+        except Exception as e:
+            print(f"❌ 获取trending项目失败: {e}")
+            return []
+    
     def get_repository_details(self, repo: Dict) -> Dict:
         """获取项目详细信息"""
         return {
@@ -45,4 +87,3 @@ class GitHubClient:
             "size": repo.get('size', 0),
             "forks": repo.get('forks_count', 0),
         }
-
