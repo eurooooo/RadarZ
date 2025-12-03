@@ -38,10 +38,10 @@ export default function AIAssistant() {
   };
 
   return (
-    <aside className="w-[40%] fixed right-0 top-0 h-screen bg-white border-l border-gray-100 flex flex-col">
+    <aside className="w-[40%] fixed right-0 top-0 h-screen border-l border-gray-100 flex flex-col">
       <div className="p-6 border-b border-gray-100">
         <div className="flex items-center gap-2 mb-4">
-          <Sparkles className="w-5 h-5 text-[#B92B27]" />
+          <Sparkles className="w-5 h-5 text-primary" />
           <h2 className="text-lg font-semibold text-gray-900">AI Assistant</h2>
         </div>
         <div className="flex gap-2">
@@ -66,7 +66,7 @@ export default function AIAssistant() {
             <div
               className={`max-w-[80%] rounded-lg p-3 ${
                 msg.role === "user"
-                  ? "bg-[#B92B27] text-white"
+                  ? "bg-primary text-white"
                   : "bg-gray-100 text-gray-900"
               }`}
             >
@@ -89,11 +89,11 @@ export default function AIAssistant() {
               }
             }}
             placeholder="Ask about this project..."
-            className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#B92B27] focus:border-transparent"
+            className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
           />
           <button
             onClick={handleSendMessage}
-            className="px-6 py-2 bg-[#B92B27] text-white rounded-lg hover:bg-[#A02622] transition-colors flex items-center gap-2"
+            className="px-6 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors flex items-center gap-2"
           >
             <Send className="w-4 h-4" />
             <span>Send</span>

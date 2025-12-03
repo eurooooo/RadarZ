@@ -13,9 +13,7 @@ export default function ExploreProjects({
 }: ExploreProjectsProps) {
   return (
     <div>
-      <h1 className="text-2xl font-bold text-gray-900 mb-6">
-        Explore Projects
-      </h1>
+      <h1 className="text-2xl font-bold text-primary mb-6">Explore Projects</h1>
 
       {loading && <ProjectCardSkeleton />}
 
@@ -29,4 +27,3 @@ export default function ExploreProjects({
     </div>
   );
 }
-

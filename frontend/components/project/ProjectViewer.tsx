@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { getProjectById, type Project } from "@/data/mockProjects";
-import BottomSearchBar from "@/components/layout/BottomSearchBar";
 
 export default function ProjectViewer() {
   const params = useParams();
@@ -23,7 +22,7 @@ export default function ProjectViewer() {
   }, [id]);
 
   return (
-    <main className="flex-1 ml-60 mr-[40%]">
+    <main className="flex-1 ml-60 mr-[40%] h-screen overflow-y-auto">
       <div className="max-w-4xl mx-auto px-8 py-8">
         {loading ? (
           <div className="animate-pulse">
@@ -34,7 +33,7 @@ export default function ProjectViewer() {
         ) : project ? (
           <>
             <div className="mb-6">
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">
+              <h1 className="text-3xl font-bold text-primary mb-2">
                 {project.title}
               </h1>
               <p className="text-gray-600 mb-4">{project.description}</p>
@@ -49,7 +48,7 @@ export default function ProjectViewer() {
                 ))}
               </div>
             </div>
-            <div className="h-screen bg-gray-50 border border-gray-200 rounded-lg flex items-center justify-center">
+            <div className="h-screen border border-gray-200 rounded-lg flex items-center justify-center">
               <div className="text-center">
                 <p className="text-gray-500 text-lg mb-2">
                   Readme / Code Viewer Placeholder
@@ -66,7 +65,6 @@ export default function ProjectViewer() {
           </div>
         )}
       </div>
-      <BottomSearchBar />
     </main>
   );
 }
