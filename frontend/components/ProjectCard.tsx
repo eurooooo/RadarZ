@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { Star, GitFork, Bookmark, TrendingUp } from "lucide-react";
 
 interface ProjectCardProps {
@@ -10,6 +11,7 @@ interface ProjectCardProps {
   tags: string[];
   stars: number;
   forks: number;
+  image_url?: string | null;
 }
 
 export default function ProjectCard({
@@ -21,21 +23,46 @@ export default function ProjectCard({
   tags,
   stars,
   forks,
+  image_url,
 }: ProjectCardProps) {
   return (
     <Link href={`/project/${id}`}>
       <div className="border border-gray-200 rounded-lg mb-4 hover:shadow-md transition-all cursor-pointer overflow-hidden flex">
         {/* Left Panel - Image Preview */}
-        <div className="w-48 shrink-0 relative  border-r border-gray-200">
-          {/* Loading placeholder - skeleton */}
-          <div className="h-full w-full flex flex-col items-center justify-center p-4 animate-pulse">
-            <div className="w-full h-full bg-gray-200 rounded-lg mb-2"></div>
-            {/* Views indicator */}
-            <div className="flex items-center gap-1 text-xs text-gray-500 mt-2">
-              <TrendingUp className="w-3 h-3" />
-              <span>{stars}</span>
+        <div className="w-48 shrink-0 relative border-r border-gray-200 bg-gray-100">
+          {image_url ? (
+            <>
+              <Image
+                src={image_url}
+                alt={`${title} preview`}
+                fill
+                className="object-cover"
+                unoptimized
+              />
+              {/* Stars indicator overlay */}
+              <div className="absolute bottom-2 left-2 right-2 flex items-center gap-1 text-xs text-white bg-black/50 backdrop-blur-sm px-2 py-1 rounded">
+                <TrendingUp className="w-3 h-3" />
+                <span>{stars}</span>
+              </div>
+            </>
+          ) : (
+            /* Fallback placeholder */
+            <div className="h-full w-full flex flex-col items-center justify-center p-4 bg-gradient-to-br from-gray-100 to-gray-200">
+              <div className="w-full h-full flex items-center justify-center">
+                <div className="text-center">
+                  <div className="w-16 h-16 mx-auto mb-2 bg-gray-300 rounded-lg flex items-center justify-center">
+                    <Star className="w-8 h-8 text-gray-400" />
+                  </div>
+                  <p className="text-xs text-gray-500 mt-2">No Preview</p>
+                </div>
+              </div>
+              {/* Stars indicator */}
+              <div className="absolute bottom-2 left-2 right-2 flex items-center gap-1 text-xs text-gray-600">
+                <TrendingUp className="w-3 h-3" />
+                <span>{stars}</span>
+              </div>
             </div>
-          </div>
+          )}
         </div>
 
         {/* Right Panel - Content */}

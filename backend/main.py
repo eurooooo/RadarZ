@@ -1,12 +1,15 @@
 from typing import List
-
+import os
+from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
 
+from src.models import Project
+from src.project_service import ProjectService
+
+load_dotenv()
 
 app = FastAPI()
-
 
 origins = [
     "http://localhost:3000",
@@ -21,59 +24,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-
-class Project(BaseModel):
-    id: str
-    title: str
-    authors: str
-    date: str
-    description: str
-    tags: list[str]
-    stars: int
-    forks: int
-
-
-mock_projects: list[Project] = [
-    Project(
-        id="1",
-        title="facebook/react",
-        authors="Facebook",
-        date="2 days ago",
-        description=(
-            "A declarative, efficient, and flexible JavaScript library for building "
-            "user interfaces. React makes it painless to create interactive UIs."
-        ),
-        tags=["javascript", "react", "ui", "frontend"],
-        stars=234_000,
-        forks=46_000,
-    ),
-    Project(
-        id="2",
-        title="vercel/next.js",
-        authors="Vercel",
-        date="1 day ago",
-        description=(
-            "The React Framework for Production. Next.js gives you the best developer "
-            "experience with all the features you need for production."
-        ),
-        tags=["javascript", "react", "nextjs", "framework"],
-        stars=125_000,
-        forks=25_000,
-    ),
-    Project(
-        id="3",
-        title="microsoft/typescript",
-        authors="Microsoft",
-        date="3 days ago",
-        description=(
-            "TypeScript is a superset of JavaScript that compiles to clean JavaScript "
-            "output. It adds static type definitions to JavaScript."
-        ),
-        tags=["typescript", "language", "compiler"],
-        stars=98_000,
-        forks=12_800,
-    ),
-]
+# 初始化项目服务
+# 可以从环境变量获取 GitHub token（可选）
+github_token = os.getenv("GITHUB_TOKEN")
+project_service = ProjectService(github_token=github_token)
 
 
 @app.get("/")
@@ -82,5 +36,6 @@ async def root():
 
 
 @app.get("/projects", response_model=List[Project])
-async def get_projects() -> list[Project]:
-    return mock_projects
+async def get_projects() -> List[Project]:
+    """获取当日的 GitHub trending 项目"""
+    return project_service.get_trending_projects(limit=25)

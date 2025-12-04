@@ -7,6 +7,7 @@ export interface Project {
   tags: string[];
   stars: number;
   forks: number;
+  image_url?: string | null;
 }
 
 export const mockProjects: Project[] = [

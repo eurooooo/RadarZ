@@ -1,4 +1,6 @@
+import { Suspense } from "react";
 import ProjectCard from "./ProjectCard";
+import ProjectCardSkeleton from "./ProjectCardSkeleton";
 import { type Project } from "@/data/mockProjects";
 
 const BACKEND_BASE_URL =
@@ -6,7 +8,7 @@ const BACKEND_BASE_URL =
 
 async function fetchProjects(): Promise<Project[]> {
   const res = await fetch(`${BACKEND_BASE_URL}/projects`, {
-    cache: "no-store",
+    next: { revalidate: 10 }, // 每10秒重新验证
   });
 
   if (!res.ok) {
@@ -16,28 +18,38 @@ async function fetchProjects(): Promise<Project[]> {
   return (await res.json()) as Project[];
 }
 
-export default async function ExploreProjects() {
-  let projects: Project[] = [];
+async function ProjectsList() {
+  const projects = await fetchProjects();
 
-  try {
-    projects = await fetchProjects();
-  } catch (error) {
-    console.error("Error fetching projects", error);
+  if (projects.length === 0) {
+    return <p className="text-sm text-gray-500">No projects found.</p>;
   }
 
   return (
     <div>
+      {projects.map((project) => (
+        <ProjectCard key={project.id} {...project} />
+      ))}
+    </div>
+  );
+}
+
+export default function ExploreProjects() {
+  return (
+    <div>
       <h1 className="text-2xl font-bold text-primary mb-6">Explore Projects</h1>
 
-      {projects.length > 0 ? (
-        <div>
-          {projects.map((project) => (
-            <ProjectCard key={project.id} {...project} />
-          ))}
-        </div>
-      ) : (
-        <p className="text-sm text-gray-500">No projects found.</p>
-      )}
+      <Suspense
+        fallback={
+          <div>
+            {Array.from({ length: 5 }).map((_, index) => (
+              <ProjectCardSkeleton key={index} />
+            ))}
+          </div>
+        }
+      >
+        <ProjectsList />
+      </Suspense>
     </div>
   );
 }
