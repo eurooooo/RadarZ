@@ -32,26 +32,41 @@ class ProjectService:
         )
 
         projects = []
-        for idx, repo in enumerate(repos, start=1):
+        for repo in repos:
             # 转换 GitHub API 数据为 Project 模型
-            project = self._convert_repo_to_project(repo, idx)
+            project = self._convert_repo_to_project(repo)
             projects.append(project)
 
         return projects
 
-    def _convert_repo_to_project(self, repo: Dict, project_id: int) -> Project:
+    def get_repository_readme(
+        self, repo_name: str, ref: Optional[str] = None
+    ) -> Optional[str]:
+        """
+        获取指定仓库的 README 内容
+
+        Args:
+            repo_name: 仓库全名 "owner/repo"
+            ref: 分支名或 commit sha（可选）
+
+        Returns:
+            README 文本，如果不存在返回 None
+        """
+        return self.github_client.get_repository_readme(repo_name, ref)
+
+    def _convert_repo_to_project(self, repo: Dict) -> Project:
         """
         将 GitHub 仓库数据转换为 Project 模型
         
         Args:
             repo: GitHub API 返回的仓库数据
-            project_id: 项目 ID
             
         Returns:
             Project 对象
         """
         # 获取作者（通常是仓库所有者的用户名）
         authors = repo.get("owner", {}).get("login", "Unknown")
+        full_name = repo.get("full_name", "")
 
         # 格式化日期（使用 updated_at，因为这是 trending 的依据）
         updated_at = repo.get("updated_at", "")
@@ -68,11 +83,11 @@ class ProjectService:
 
         # 生成 GitHub Open Graph 图片 URL
         # 使用 GitHub 的 Open Graph 图片服务
-        full_name = repo.get("full_name", "")
         image_url = self._get_repository_image_url(full_name) if full_name else None
 
         return Project(
-            id=str(project_id),
+            # 使用仓库全名作为稳定 ID，避免列表重排导致 ID 变化
+            id=full_name or repo.get("html_url", ""),
             title=full_name,
             authors=authors,
             date=date_str,

@@ -117,3 +117,45 @@ class GitHubClient:
             "forks": repo.get("forks_count", 0),
         }
 
+    def get_repository_readme(
+        self, repo_name: str, ref: Optional[str] = None
+    ) -> Optional[str]:
+        """
+        获取指定仓库的 README 文本内容
+
+        Args:
+            repo_name: 仓库全名，格式 "owner/repo"
+            ref: 分支名或 commit sha（可选）
+
+        Returns:
+            README 纯文本内容；如果未找到则返回 None
+        """
+        if not repo_name:
+            return None
+
+        api_url = f"https://api.github.com/repos/{repo_name}/readme"
+        params = {"ref": ref} if ref else None
+
+        try:
+            res = requests.get(api_url, headers=self.headers, params=params, timeout=10)
+            if res.status_code == 404:
+                return None
+            res.raise_for_status()
+            data = res.json()
+
+            # README content 默认 base64 编码
+            content = data.get("content")
+            encoding = data.get("encoding")
+            if not content:
+                return None
+
+            if encoding == "base64":
+                import base64
+
+                return base64.b64decode(content).decode("utf-8", errors="ignore")
+
+            return content
+        except requests.exceptions.RequestException as e:
+            print(f"❌ 获取 README 失败: {e}")
+            return None
+

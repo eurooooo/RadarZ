@@ -9,4 +9,6 @@ dependencies = [
     "requests>=2.31.0",
     "beautifulsoup4>=4.12.0",
     "python-dotenv>=1.2.1",
+    "langchain>=1.1.2",
+    "langgraph>=1.0.4",
 ]

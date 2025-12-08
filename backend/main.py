@@ -1,11 +1,13 @@
-from typing import List
+from typing import List, Optional
 import os
 from dotenv import load_dotenv
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
 
 from src.models import Project
 from src.project_service import ProjectService
+from src.readme_assistant import ReadmeAssistant
 
 load_dotenv()
 
@@ -28,6 +30,13 @@ app.add_middleware(
 # 可以从环境变量获取 GitHub token（可选）
 github_token = os.getenv("GITHUB_TOKEN")
 project_service = ProjectService(github_token=github_token)
+readme_assistant = ReadmeAssistant()
+
+
+class SummarizeReadmeRequest(BaseModel):
+    repo_name: Optional[str] = None  # 仓库全名（owner/repo）
+    ref: Optional[str] = None  # 分支或 commit
+    readme: Optional[str] = None  # 已有 README 文本，若为空则尝试拉取
 
 
 @app.get("/")
@@ -39,3 +48,21 @@ async def root():
 async def get_projects() -> List[Project]:
     """获取当日的 GitHub trending 项目"""
     return project_service.get_trending_projects(limit=25)
+
+
+@app.get("/summaries/readme")
+async def summarize_readme_get(
+    repo_name: str = Query(..., description="仓库全名，如 owner/repo"),
+    ref: Optional[str] = Query(None, description="分支名或 commit"),
+):
+    """
+    GET 方式生成 README 摘要，便于前端直接调用。
+    """
+    readme_text = project_service.get_repository_readme(repo_name, ref)
+    if not readme_text:
+        raise HTTPException(
+            status_code=404, detail="缺少 README 内容，且无法通过仓库名获取。"
+        )
+
+    summary = readme_assistant.summarize(readme_text)
+    return {"repo": repo_name, "summary": summary}

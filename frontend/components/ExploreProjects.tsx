@@ -8,7 +8,7 @@ const BACKEND_BASE_URL =
 
 async function fetchProjects(): Promise<Project[]> {
   const res = await fetch(`${BACKEND_BASE_URL}/projects`, {
-    next: { revalidate: 10 }, // 每10秒重新验证
+    next: { revalidate: 0 },
   });
 
   if (!res.ok) {
