@@ -37,7 +37,6 @@ export default async function ProjectViewer({ slug }: ProjectViewerProps) {
       <div className="max-w-4xl mx-auto px-8 py-8">
         <div className="mb-6">
           <h1 className="text-3xl font-bold text-primary mb-2">{slug}</h1>
-          <p className="text-gray-600 mb-4">项目 README 摘要（后端实时生成）</p>
         </div>
         <div className="h-screen border border-gray-200 rounded-lg p-6 bg-white">
           <pre className="whitespace-pre-wrap text-sm text-gray-800 leading-6">

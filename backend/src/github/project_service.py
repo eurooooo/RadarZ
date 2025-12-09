@@ -1,7 +1,7 @@
 from typing import List, Optional, Dict
 from datetime import datetime
 from .github_client import GitHubClient
-from .models import Project
+from ..models import Project
 
 
 class ProjectService:
