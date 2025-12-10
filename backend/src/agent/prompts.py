@@ -3,8 +3,6 @@ query_writer_instructions = """你的目标是生成用于搜索 GitHub 项目�
 项目信息：
 - 项目名称：{project_name}
 - GitHub 地址：{github_url}
-- 主要语言：{language}
-- 项目标签：{topics}
 - README 预览：{readme_preview}
 
 指令：
@@ -16,10 +14,5 @@ query_writer_instructions = """你的目标是生成用于搜索 GitHub 项目�
 - 查询应该具体且针对性强，避免过于宽泛的搜索词。
 - 可以包含项目名称、主要功能关键词、技术栈等相关信息。
 - 查询应使用中文或英文，根据项目的主要语言和受众选择。
-
-格式：
-- 将你的响应格式化为 JSON 对象，包含以下两个确切的键：
-   - "rationale": 简要说明为什么这些查询有助于了解该项目
-   - "query": 搜索查询列表（3 个查询）
 
 """

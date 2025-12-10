@@ -1,8 +1,13 @@
 from datetime import datetime
-from schemas import SearchQueryList
-from state import ResearchState
-from prompts import query_writer_instructions
+import os
+from langgraph.types import Send
+from .schemas import SearchQueryList
+from .state import ResearchState, WebSearchState
+from .prompts import query_writer_instructions
 from langchain.chat_models import init_chat_model
+
+from tavily import TavilyClient
+from typing import Dict
 
 def generate_queries(state: ResearchState) -> ResearchState:
     """生成3个不同维度的搜索查询"""
@@ -12,46 +17,65 @@ def generate_queries(state: ResearchState) -> ResearchState:
     prompt = query_writer_instructions.format(
         project_name=state['project_name'],
         github_url=state['github_url'],
-        language=state['repo_stats'].get('language', 'Unknown'),
-        topics=', '.join(state['repo_stats'].get('topics', [])),
         readme_preview=state['readme'][:500]
     )
     
     response = llm.with_structured_output(SearchQueryList).invoke(prompt)
     
-    state['search_queries'] = response.query
-    return state
+    return {'search_queries': response.query}
 
-from tavily import TavilyClient
-import asyncio
-from collections import defaultdict
+def to_web_research(state: ResearchState):
+    """LangGraph node that sends the search queries to the web research node.
 
-async def search_and_deduplicate(state: ResearchState) -> ResearchState:
-    """并行搜索多个查询，然后去重"""
+    This is used to spawn n number of web research nodes, one for each search query.
+    """
+    return [
+        Send("web_research", {"search_query": search_query})
+        for search_query in state["search_queries"]
+    ]
+
+def web_research(state: WebSearchState) -> ResearchState:
+    """处理单个搜索查询（由 Send 并行调用）"""
     
-    tavily_client = TavilyClient(api_key="your-tavily-key")
+    tavily_client = TavilyClient(api_key=os.getenv("TAVILY_API_KEY"))
     
-    # 并行搜索所有查询
-    async def search_single_query(query: str) -> List[Dict]:
-        print(f"🔍 Searching: {query}")
-        
-        results = tavily_client.search(
-            query=query,
-            search_depth="advanced",  # 获取完整内容
-            max_results=5,  # 每个查询最多5个结果
-            include_raw_content=True  # ⭐ 包含完整网页内容
-        )
-        
-        return results.get('results', [])
+    # 从 Send 传递的 state 中获取单个查询
+    query = state['search_query']
     
-    # 并行执行所有搜索
-    tasks = [search_single_query(q) for q in state['search_queries']]
-    all_results = await asyncio.gather(*tasks)
+    print(f"🔍 Searching: {query}")
     
-    # 展平结果
+    # 执行单个查询的搜索
+    results = tavily_client.search(
+        query=query,
+        search_depth="advanced",  # 获取完整内容
+        max_results=10,
+        include_raw_content=True  # 包含完整网页内容
+    )
+    
+    search_results = {
+        'query': results.get('query'),
+        'title': results.get('results')[0].get('title'),
+    }
+    # 只返回原始结果，LangGraph 会自动合并（使用 operator.add）
+    return {
+        'raw_search_results': [search_results]
+    }
+
+def aggregate_and_deduplicate(state: ResearchState) -> ResearchState:
+    """聚合所有搜索结果并去重"""
+    from urllib.parse import urlparse
+    
+    # 展平所有结果（因为 operator.add 可能产生嵌套列表）
     flat_results = []
-    for results in all_results:
-        flat_results.extend(results)
+    raw_results = state.get('raw_search_results', [])
+    
+    # 处理 raw_search_results（可能是列表的列表，因为 operator.add 会合并列表）
+    if raw_results:
+        for item in raw_results:
+            if isinstance(item, list):
+                flat_results.extend(item)
+            else:
+                flat_results.append(item)
     
     print(f"📊 Total search results before deduplication: {len(flat_results)}")
     
@@ -60,31 +84,28 @@ async def search_and_deduplicate(state: ResearchState) -> ResearchState:
     deduplicated = []
     
     for result in flat_results:
-        url = result['url']
+        url = result.get('url', '')
         
         # 规范化 URL（去掉 query params 和 fragments）
-        from urllib.parse import urlparse
         parsed = urlparse(url)
         normalized_url = f"{parsed.scheme}://{parsed.netloc}{parsed.path}"
         
-        if normalized_url not in seen_urls:
+        if normalized_url and normalized_url not in seen_urls:
             seen_urls.add(normalized_url)
             deduplicated.append({
-                'url': result['url'],
-                'title': result['title'],
+                'url': result.get('url', ''),
+                'title': result.get('title', ''),
                 'content': result.get('raw_content', result.get('content', '')),
                 'score': result.get('score', 0)
             })
     
     print(f"✅ After deduplication: {len(deduplicated)} unique results")
     
-    state['raw_search_results'] = flat_results
-    state['deduplicated_results'] = deduplicated
-    return state
+    return {'deduplicated_results': deduplicated}
 
 from langchain_core.prompts import ChatPromptTemplate
 from pydantic import BaseModel, Field
-
+import asyncio
 class RelevanceAssessment(BaseModel):
     """相关性评估结果"""
     is_relevant: bool = Field(description="是否与项目相关")
