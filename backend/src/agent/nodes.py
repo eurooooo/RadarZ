@@ -1,28 +1,32 @@
 from datetime import datetime
 import os
 from langgraph.types import Send
-from .schemas import SearchQueryList
+from .schemas import SearchQueryList, RelevanceAssessmentList
 from .state import ResearchState, WebSearchState
-from .prompts import query_writer_instructions
+from .prompts import query_writer_instructions, relevance_assessment_system_prompt
 from langchain.chat_models import init_chat_model
 
 from tavily import TavilyClient
 from typing import Dict
 
+def get_llm():
+    return init_chat_model(model="gemini-2.5-flash", model_provider="google_genai", temperature=0)
+
 def generate_queries(state: ResearchState) -> ResearchState:
     """生成3个不同维度的搜索查询"""
     
-    llm = init_chat_model(model="gemini-2.5-flash", model_provider="google_genai", temperature=0)
-    
-    prompt = query_writer_instructions.format(
+    messages = query_writer_instructions.format_messages(
         project_name=state['project_name'],
         github_url=state['github_url'],
         readme_preview=state['readme'][:500]
     )
+
+    llm = get_llm()
     
-    response = llm.with_structured_output(SearchQueryList).invoke(prompt)
+    response = llm.with_structured_output(SearchQueryList).invoke(messages)
     
-    return {'search_queries': response.query}
+    # return {'search_queries': response.query}
+    return {'search_queries': [state['project_name']]}
 
 def to_web_research(state: ResearchState):
     """LangGraph node that sends the search queries to the web research node.
@@ -47,145 +51,68 @@ def web_research(state: WebSearchState) -> ResearchState:
     # 执行单个查询的搜索
     results = tavily_client.search(
         query=query,
-        search_depth="advanced",  # 获取完整内容
         max_results=10,
         include_raw_content=True  # 包含完整网页内容
     )
     
-    search_results = {
-        'query': results.get('query'),
-        'title': results.get('results')[0].get('title'),
-    }
+    search_results = results.get('results', [])
     # 只返回原始结果，LangGraph 会自动合并（使用 operator.add）
     return {
-        'raw_search_results': [search_results]
+        'search_results': search_results
     }
 
-def aggregate_and_deduplicate(state: ResearchState) -> ResearchState:
-    """聚合所有搜索结果并去重"""
-    from urllib.parse import urlparse
+def filter_irrelevant_results(state: ResearchState) -> ResearchState:
+    """用 LLM 过滤掉不相关的搜索结果（一次性处理所有结果）"""
     
-    # 展平所有结果（因为 operator.add 可能产生嵌套列表）
-    flat_results = []
-    raw_results = state.get('raw_search_results', [])
-    
-    # 处理 raw_search_results（可能是列表的列表，因为 operator.add 会合并列表）
-    if raw_results:
-        for item in raw_results:
-            if isinstance(item, list):
-                flat_results.extend(item)
-            else:
-                flat_results.append(item)
-    
-    print(f"📊 Total search results before deduplication: {len(flat_results)}")
-    
-    # 去重逻辑
-    seen_urls = set()
-    deduplicated = []
-    
-    for result in flat_results:
-        url = result.get('url', '')
-        
-        # 规范化 URL（去掉 query params 和 fragments）
-        parsed = urlparse(url)
-        normalized_url = f"{parsed.scheme}://{parsed.netloc}{parsed.path}"
-        
-        if normalized_url and normalized_url not in seen_urls:
-            seen_urls.add(normalized_url)
-            deduplicated.append({
-                'url': result.get('url', ''),
-                'title': result.get('title', ''),
-                'content': result.get('raw_content', result.get('content', '')),
-                'score': result.get('score', 0)
-            })
-    
-    print(f"✅ After deduplication: {len(deduplicated)} unique results")
-    
-    return {'deduplicated_results': deduplicated}
-
-from langchain_core.prompts import ChatPromptTemplate
-from pydantic import BaseModel, Field
-import asyncio
-class RelevanceAssessment(BaseModel):
-    """相关性评估结果"""
-    is_relevant: bool = Field(description="是否与项目相关")
-    relevance_score: float = Field(description="相关性分数 0-1")
-    reason: str = Field(description="判断理由")
-
-async def filter_irrelevant_results(state: ResearchState) -> ResearchState:
-    """用 LLM 过滤掉不相关的搜索结果"""
-    
-    llm = ChatAnthropic(
-        model="claude-3-5-sonnet-20241022",
-        temperature=0
-    ).with_structured_output(RelevanceAssessment)
-    
-    prompt = ChatPromptTemplate.from_messages([
-        ("system", """You are a relevance assessment expert. 
-        Evaluate if a search result is relevant to understanding a GitHub project.
-        
-        Relevant results include:
-        - Reviews, opinions, or comparisons of the project
-        - Real-world usage examples or case studies
-        - Technical discussions or tutorials
-        - Issues, limitations, or criticisms
-        
-        Irrelevant results include:
-        - Completely unrelated topics
-        - Generic programming tutorials not specific to this project
-        - Spam or low-quality content"""),
-        
-        ("user", """Project: {project_name}
-        README: {readme_preview}
-        
-        Search Result:
-        Title: {title}
-        URL: {url}
-        Content Preview (first 1000 chars):
-        {content_preview}
-        
-        Assess relevance:""")
+    # 构建所有搜索结果的文本表示
+    results = state['search_results']
+    search_results_text = "\n\n---\n\n".join([
+        f"Result {i+1}:\nTitle: {r['title']}\nURL: {r['url']}\nContent Preview:\n{(r.get('raw_content') or r.get('content') or 'None')[:1000]}"
+        for i, r in enumerate(results)
     ])
     
-    # 并行评估所有结果
-    async def assess_single_result(result: Dict) -> tuple[Dict, RelevanceAssessment]:
-        assessment = await llm.ainvoke(prompt.format_messages(
-            project_name=state['project_name'],
-            readme_preview=state['readme'][:500],
-            title=result['title'],
-            url=result['url'],
-            content_preview=result['content'][:1000]
-        ))
-        return result, assessment
+    prompt = relevance_assessment_system_prompt.format_messages(
+        project_name=state['project_name'],
+        readme_preview=state['readme'][:500],
+        search_results=search_results_text
+    )
     
-    print(f"🔍 Filtering {len(state['deduplicated_results'])} results...")
+    print(f"🔍 Filtering {len(results)} results...")
     
-    tasks = [assess_single_result(r) for r in state['deduplicated_results']]
-    assessments = await asyncio.gather(*tasks)
+    # 一次性评估所有结果
+    response = get_llm().with_structured_output(RelevanceAssessmentList).invoke(prompt)
+    
+    assessments = response.assessments
+    
+    # 确保评估结果数量与搜索结果数量一致
+    if len(assessments) != len(results):
+        print(f"⚠️ Warning: Expected {len(results)} assessments, got {len(assessments)}")
+        # 如果数量不匹配，只处理匹配的部分
+        min_len = min(len(assessments), len(results))
+        assessments = assessments[:min_len]
+        results = results[:min_len]
     
     # 只保留相关的结果（relevance_score > 0.6）
     filtered = []
-    for result, assessment in assessments:
+    for result, assessment in zip(results, assessments):
         if assessment.is_relevant and assessment.relevance_score > 0.6:
-            result['relevance_score'] = assessment.relevance_score
-            result['relevance_reason'] = assessment.reason
             filtered.append(result)
-            print(f"   ✅ {result['title'][:60]}... (score: {assessment.relevance_score:.2f})")
+            print(f"   ✅ {result['title'][:60]}... url: {result['url']} (score: {assessment.relevance_score:.2f})")
         else:
-            print(f"   ❌ {result['title'][:60]}... (score: {assessment.relevance_score:.2f})")
-    
-    # 按相关性排序
-    filtered.sort(key=lambda x: x['relevance_score'], reverse=True)
+            print(f"   ❌ {result['title'][:60]}... url: {result['url']} (score: {assessment.relevance_score:.2f})")
     
     print(f"✅ Filtered down to {len(filtered)} relevant results")
     
-    state['filtered_results'] = filtered
-    return state
+    return {'filtered_results': filtered}
 
 def generate_final_summary(state: ResearchState) -> ResearchState:
     """基于 README 和搜索结果生成最终总结"""
     
-    llm = ChatAnthropic(model="claude-3-5-sonnet-20241022", temperature=0)
+    llm = init_chat_model(
+        model="claude-3-5-sonnet-20241022",
+        model_provider="anthropic",
+        temperature=0
+    )
     
     # 构建搜索结果的上下文
     search_context = "\n\n---\n\n".join([

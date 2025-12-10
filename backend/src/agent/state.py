@@ -1,6 +1,5 @@
-from typing import TypedDict, Dict, List, Annotated
+from typing import TypedDict, Annotated
 import operator
-from .schemas import SearchQueryList
 
 class ResearchState(TypedDict, total=False):
     # 输入
@@ -9,16 +8,16 @@ class ResearchState(TypedDict, total=False):
     github_url: str
     
     # Node 1 输出
-    search_queries: Annotated[SearchQueryList, operator.add]
+    search_queries: Annotated[list[str], operator.add]
     
     # Node 2 输出（由 Send 并行调用，使用 operator.add 合并）
-    raw_search_results: Annotated[List[Dict], operator.add]  # 支持增量添加
+    search_results: Annotated[list[dict], operator.add]  # 支持增量添加
     
     # # Node 3 输出（聚合和去重后，覆盖之前的结果）
     # deduplicated_results: List[Dict]
     
     # # Node 4 输出
-    # filtered_results: List[Dict]
+    filtered_results: Annotated[list[dict], operator.add]
     
     # # Node 5 输出
     # final_summary: str
