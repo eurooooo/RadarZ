@@ -1,16 +1,17 @@
 from datetime import datetime
 import os
+from pathlib import Path
 from langgraph.types import Send
-from .schemas import SearchQueryList, RelevanceAssessmentList
+from .schemas import FinalSummary, SearchQueryList, RelevanceAssessmentList
 from .state import ResearchState, WebSearchState
-from .prompts import query_writer_instructions, relevance_assessment_system_prompt
+from .prompts import query_writer_instructions, relevance_assessment_system_prompt, final_summary_prompt, test_summary_prompt
 from langchain.chat_models import init_chat_model
 
 from tavily import TavilyClient
 from typing import Dict
 
 def get_llm():
-    return init_chat_model(model="gemini-2.5-flash", model_provider="google_genai", temperature=0)
+    return init_chat_model(model="gpt-5-mini", temperature=0)
 
 def generate_queries(state: ResearchState) -> ResearchState:
     """生成3个不同维度的搜索查询"""
@@ -23,7 +24,7 @@ def generate_queries(state: ResearchState) -> ResearchState:
 
     llm = get_llm()
     
-    response = llm.with_structured_output(SearchQueryList).invoke(messages)
+    # response = llm.with_structured_output(SearchQueryList).invoke(messages)
     
     # return {'search_queries': response.query}
     return {'search_queries': [state['project_name']]}
@@ -108,59 +109,99 @@ def filter_irrelevant_results(state: ResearchState) -> ResearchState:
 def generate_final_summary(state: ResearchState) -> ResearchState:
     """基于 README 和搜索结果生成最终总结"""
     
-    llm = init_chat_model(
-        model="claude-3-5-sonnet-20241022",
-        model_provider="anthropic",
-        temperature=0
-    )
+    # 构建搜索结果的文本表示
+    filtered_results = state.get('filtered_results', [])
     
-    # 构建搜索结果的上下文
-    search_context = "\n\n---\n\n".join([
-        f"Source: {r['title']}\nURL: {r['url']}\nRelevance: {r['relevance_score']:.2f}\n\nContent:\n{r['content'][:3000]}..."
-        for r in state['filtered_results'][:10]  # 最多用前10个结果
-    ])
+    if filtered_results:
+        results_text = "\n\n---\n\n".join([
+            f"标题: {r.get('title', 'N/A')}\n"
+            f"URL: {r.get('url', 'N/A')}\n"
+            f"内容: {(r.get('raw_content') or r.get('content') or 'N/A')[:2000]}"
+            for r in filtered_results
+        ])
+    else:
+        results_text = "未找到相关的搜索结果。"
     
-    prompt = ChatPromptTemplate.from_messages([
-        ("system", """You are a technical writer creating a comprehensive project summary.
-        
-        Your summary should include:
-        1. **Overview**: What the project does (1-2 sentences)
-        2. **Key Features**: Main functionalities (bullet points)
-        3. **Technical Highlights**: Interesting technical approaches or innovations
-        4. **Real-World Reception**: What users/community think (based on search results)
-        5. **Pros**: Strengths of the project
-        6. **Cons**: Limitations or issues (if any mentioned)
-        7. **Comparison**: How it differs from alternatives (if discussed)
-        8. **Use Cases**: Who should use this and when
-        
-        Be objective and cite sources when making claims.
-        Use markdown formatting."""),
-        
-        ("user", """Project: {project_name}
-        GitHub: {github_url}
-        Stars: {stars} | Language: {language}
-        
-        === PROJECT README ===
-        {readme}
-        
-        === EXTERNAL RESEARCH (from web search) ===
-        {search_context}
-        
-        Generate a comprehensive summary:""")
-    ])
-    
-    print("📝 Generating final summary...")
-    
-    response = llm.invoke(prompt.format_messages(
+    # 构建 prompt
+    messages = final_summary_prompt.format_messages(
         project_name=state['project_name'],
         github_url=state['github_url'],
-        stars=state['repo_stats'].get('stars', 'N/A'),
-        language=state['repo_stats'].get('language', 'Unknown'),
-        readme=state['readme'][:5000],  # README 限制长度避免超 token
-        search_context=search_context
-    ))
+        readme=state['readme'],
+        filtered_results=results_text
+    )
     
-    state['final_summary'] = response.content
-    print("✅ Summary generated!")
+    print(f"📝 Generating final summary for {state['project_name']}...")
     
-    return state
+    # 调用 LLM 生成总结
+    llm = get_llm()
+    response = llm.with_structured_output(FinalSummary).invoke(messages)
+    
+    final_summary = response.summary
+    
+    print(f"✅ Final summary generated ({len(final_summary)} characters)")
+    
+    # 将总结写入文件
+    output_dir = Path(__file__).parent.parent.parent / "summaries"
+    output_dir.mkdir(exist_ok=True)
+    
+    # 生成安全的文件名（处理特殊字符如 /）
+    safe_project_name = state['project_name'].replace("/", "_").replace("\\", "_")
+    safe_project_name = "".join(c for c in safe_project_name if c.isalnum() or c in ('_', '-', '.'))
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    filename = f"{safe_project_name}_{timestamp}.md"
+    filepath = output_dir / filename
+    
+    # 写入文件
+    with open(filepath, 'w', encoding='utf-8') as f:
+        f.write(f"# {state['project_name']}\n\n")
+        f.write(f"**GitHub URL:** {state['github_url']}\n\n")
+        f.write(f"**生成时间:** {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n\n")
+        f.write("---\n\n")
+        f.write(final_summary)
+    
+    print(f"💾 Summary saved to: {filepath}")
+    
+    return {'final_summary': final_summary}
+
+def test_generate_final_summary(state: ResearchState) -> ResearchState:
+    """基于 README 生成最终总结（测试用）"""
+    
+    # 构建 prompt
+    messages = test_summary_prompt.format_messages(
+        project_name=state['project_name'],
+        github_url=state['github_url'],
+        readme=state['readme']
+    )
+    
+    print(f"📝 Generating test summary for {state['project_name']}...")
+    
+    llm = get_llm()
+    response = llm.invoke(messages)
+    
+    final_summary = response.content if hasattr(response, 'content') else str(response)
+    
+    print(f"✅ Test summary generated ({len(final_summary)} characters)")
+    
+    # 将总结写入文件（测试版本）
+    output_dir = Path(__file__).parent.parent.parent / "summaries"
+    output_dir.mkdir(exist_ok=True)
+    
+    # 生成安全的文件名（处理特殊字符如 /），并添加 test 标识
+    safe_project_name = state['project_name'].replace("/", "_").replace("\\", "_")
+    safe_project_name = "".join(c for c in safe_project_name if c.isalnum() or c in ('_', '-', '.'))
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    filename = f"{safe_project_name}_test_{timestamp}.md"
+    filepath = output_dir / filename
+    
+    # 写入文件
+    with open(filepath, 'w', encoding='utf-8') as f:
+        f.write(f"# {state['project_name']} (测试版)\n\n")
+        f.write(f"**GitHub URL:** {state['github_url']}\n\n")
+        f.write(f"**生成时间:** {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n\n")
+        f.write("**注意：** 这是基于 README 的测试版本总结，未包含网络搜索结果。\n\n")
+        f.write("---\n\n")
+        f.write(final_summary)
+    
+    print(f"💾 Test summary saved to: {filepath}")
+    
+    return {'final_summary': final_summary}

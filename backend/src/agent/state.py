@@ -20,7 +20,7 @@ class ResearchState(TypedDict, total=False):
     filtered_results: Annotated[list[dict], operator.add]
     
     # # Node 5 输出
-    # final_summary: str
+    final_summary: str
 
 class WebSearchState(TypedDict):
     search_query: str

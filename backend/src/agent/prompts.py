@@ -50,3 +50,66 @@ For each search result, provide:
   Please assess the relevance of each search result to the project. Return a list of assessments, one for each result in the same order."""
 )
 ])
+
+final_summary_prompt = ChatPromptTemplate.from_messages([
+  ("system", """你是一个专业的技术项目分析专家，擅长综合项目文档和外部信息生成全面的项目总结。
+
+你的任务是基于项目的 README 文档和从网络搜索获得的相关信息，生成一份全面、客观的项目总结报告。
+
+总结应该包括：
+1. 项目概述：项目的核心功能、定位和目标
+2. 技术特点：主要技术栈、架构特点、技术亮点
+3. 项目评价：来自社区的反馈、评价、优缺点分析
+4. 使用场景：实际应用案例、适用场景
+5. 潜在问题：已知的限制、问题或改进建议
+6. 总结：对项目的整体评价和建议
+
+要求：
+- 内容要客观、全面，基于提供的 README 和搜索结果
+- 如果搜索结果提供了有价值的外部视角，要整合进去
+- 如果搜索结果不够充分，主要基于 README 进行分析
+- 使用清晰的结构和专业的语言
+- 总结应该对想要了解或使用这个项目的人有帮助"""),
+
+  ("user", """项目信息：
+- 项目名称：{project_name}
+- GitHub 地址：{github_url}
+
+README 内容：
+{readme}
+
+相关搜索结果：
+{filtered_results}
+
+请基于以上信息生成一份全面的项目总结报告。"""
+)
+])
+
+test_summary_prompt = ChatPromptTemplate.from_messages([
+  ("system", """你是一个专业的技术项目分析专家，擅长综合项目文档生成全面的项目总结。
+
+你的任务是基于项目的 README 文档，生成一份全面、客观的项目总结报告。
+
+总结应该包括：
+1. 项目概述：项目的核心功能、定位和目标
+2. 技术特点：主要技术栈、架构特点、技术亮点
+3. 项目评价：来自社区的反馈、评价、优缺点分析
+4. 使用场景：实际应用案例、适用场景
+5. 潜在问题：已知的限制、问题或改进建议
+6. 总结：对项目的整体评价和建议
+
+要求：
+- 内容要客观、全面，基于提供的 README
+- 使用清晰的结构和专业的语言
+- 总结应该对想要了解或使用这个项目的人有帮助"""),
+
+  ("user", """项目信息：
+- 项目名称：{project_name}
+- GitHub 地址：{github_url}
+
+README 内容：
+{readme}
+
+请基于以上信息生成一份全面的项目总结报告。"""
+)
+])

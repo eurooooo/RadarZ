@@ -16,3 +16,6 @@ class RelevanceAssessmentList(BaseModel):
     assessments: List[RelevanceAssessment] = Field(
         description="每个搜索结果的相关性评估，顺序与输入的搜索结果列表一致"
     )
+
+class FinalSummary(BaseModel):
+    summary: str = Field(description="项目总结")

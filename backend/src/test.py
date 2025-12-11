@@ -1,4 +1,5 @@
 from agent import graph
+from agent.graph import test_graph
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -132,6 +133,5 @@ We do not recommend using VibeVoice in commercial or real-world applications wit
     """,
 }
 
-result = graph.invoke(input_data)
-
-# print(result)
+graph.invoke(input_data)
+test_graph.invoke(input_data)
