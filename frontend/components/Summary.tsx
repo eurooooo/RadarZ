@@ -8,7 +8,7 @@ interface SummaryResponse {
 
 async function Summary({ slug }: { slug: string }) {
   const res = await fetch(
-    `${BACKEND_BASE_URL}/summary/readme?repo_name=${encodeURIComponent(slug)}`,
+    `${BACKEND_BASE_URL}/summary?repo_name=${encodeURIComponent(slug)}`,
     { cache: "no-store" }
   );
 

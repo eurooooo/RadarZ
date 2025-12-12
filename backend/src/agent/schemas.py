@@ -1,9 +1,8 @@
-from typing import List
 from pydantic import BaseModel, Field
 
 class SearchQueryList(BaseModel):
-    query: List[str] = Field(
-        description="A list of search queries to be used for web research."
+    query: list[str] = Field(
+        description="用于网络搜索的搜索查询列表"
     )
 
 class RelevanceAssessment(BaseModel):
@@ -13,7 +12,7 @@ class RelevanceAssessment(BaseModel):
 
 class RelevanceAssessmentList(BaseModel):
     """批量搜索结果的相关性评估结果列表"""
-    assessments: List[RelevanceAssessment] = Field(
+    assessments: list[RelevanceAssessment] = Field(
         description="每个搜索结果的相关性评估，顺序与输入的搜索结果列表一致"
     )
 

@@ -159,3 +159,15 @@ class ProjectService:
         except Exception:
             return "未知时间"
 
+    def get_new_repositories(self, days, min_stars, language: Optional[str] = None, limit: int = 1000) -> List[Project]:
+        """获取新的 GitHub 项目
+        
+        Args:
+            days: 查询最近几天的项目
+            min_stars: 最小 star 数
+            language: 编程语言过滤（可选）
+            limit: 返回项目数量限制（最多1000，受GitHub API限制）
+        """
+        repos = self.github_client.get_new_repositories(days, min_stars, language, limit)
+        
+        return repos

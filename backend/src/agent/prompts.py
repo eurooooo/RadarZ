@@ -12,8 +12,7 @@ query_writer_instructions = ChatPromptTemplate.from_messages([
   返回一个包含搜索查询的列表。"""),
   ("user", """项目信息：
   - 项目名称：{project_name}
-  - GitHub 地址：{github_url}
-  - README ：{readme_preview}
+  - 项目介绍（README）：{readme}
   """)
 ])
 
@@ -38,8 +37,7 @@ relevance_assessment_system_prompt = ChatPromptTemplate.from_messages([
   ("user", """
   项目信息：
   - 项目名称：{project_name}
-  - GitHub 地址：{github_url}
-  - README ：{readme_preview}
+  - 项目介绍（README）：{readme}
   
   搜索结果：
   {search_results}
@@ -49,38 +47,34 @@ relevance_assessment_system_prompt = ChatPromptTemplate.from_messages([
 ])
 
 final_summary_prompt = ChatPromptTemplate.from_messages([
-  ("system", """你是一个专业的技术项目分析专家，擅长综合项目文档和外部信息生成全面的项目总结。
+  ("system", """你是一个专业的技术项目介绍撰写专家，擅长将项目文档转化为清晰易懂的项目介绍。
 
-你的任务是基于项目的 README 文档和从网络搜索获得的相关信息，生成一份全面、客观的项目总结报告。
+你的核心任务是生成一份清晰、易懂的项目介绍，让读者能够快速理解这个项目是做什么的、为什么存在、以及如何使用它。
 
-总结应该包括：
-1. 项目概述：项目的核心功能、定位和目标
-2. 技术特点：主要技术栈、架构特点、技术亮点
-3. 项目评价：来自社区的反馈、评价、优缺点分析
-4. 使用场景：实际应用案例、适用场景
-5. 潜在问题：已知的限制、问题或改进建议
-6. 总结：对项目的整体评价和建议
+介绍应该包括：
+1. **项目是什么**：用简洁明了的语言说明项目的核心功能和用途，让读者一眼就能理解项目在解决什么问题
+2. **主要功能**：列出项目的关键功能和特性，说明它能做什么
+3. **技术栈**：简要介绍项目使用的主要技术和工具（不需要深入技术细节）
+4. **使用场景**：说明项目适合在什么情况下使用，能解决什么实际问题
 
 要求：
-- 内容要客观、全面，基于提供的 README 和搜索结果
-- 如果搜索结果提供了有价值的外部视角，要整合进去
-- 如果搜索结果不够充分，主要基于 README 进行分析
-- 使用清晰的结构和专业的语言
-- 总结应该对想要了解或使用这个项目的人有帮助
+- 语言要清晰、易懂，避免过于技术化的表述
+- 优先使用项目的 README 文档中的信息
+- 如果搜索结果提供了有助于理解项目的补充信息，可以适当整合
+- 重点突出项目的实用价值和核心功能
+- 使用 Markdown 格式，结构清晰
+- 让一个对项目不熟悉的人读完介绍后，能够清楚地知道这个项目是做什么的
 - **重要：输出必须使用 Markdown 格式**
 """),
 
   ("user", """项目信息：
 - 项目名称：{project_name}
-- GitHub 地址：{github_url}
-
-README 内容：
-{readme}
+- 项目介绍（README）：{readme}
 
 相关搜索结果：
 {filtered_results}
 
-请基于以上信息生成一份全面的项目总结报告。**请确保输出格式为 Markdown。**"""
+请基于以上信息生成一份清晰易懂的项目介绍。**请确保输出格式为 Markdown。**"""
 )
 ])
 

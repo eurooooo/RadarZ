@@ -5,7 +5,6 @@ from dotenv import load_dotenv
 load_dotenv()
 input_data = {
     "project_name": "vibevoice",
-    "github_url": "https://github.com/microsoft/VibeVoice",
     "readme": """
     <div align="center">
 
@@ -134,4 +133,4 @@ We do not recommend using VibeVoice in commercial or real-world applications wit
 }
 
 graph.invoke(input_data)
-test_graph.invoke(input_data)
+# test_graph.invoke(input_data)

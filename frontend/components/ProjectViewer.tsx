@@ -1,5 +1,5 @@
 import { Suspense } from "react";
-import Summary from "./Summary";
+import Summary from "./project/Summary";
 
 export default async function ProjectViewer({ slug }: { slug: string }) {
   return (

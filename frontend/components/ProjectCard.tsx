@@ -31,20 +31,13 @@ export default function ProjectCard({
         {/* Left Panel - Image Preview */}
         <div className="w-48 shrink-0 relative border-r border-gray-200 bg-gray-100">
           {image_url ? (
-            <>
-              <Image
-                src={image_url}
-                alt={`${title} preview`}
-                fill
-                className="object-cover"
-                unoptimized
-              />
-              {/* Stars indicator overlay */}
-              <div className="absolute bottom-2 left-2 right-2 flex items-center gap-1 text-xs text-white bg-black/50 backdrop-blur-sm px-2 py-1 rounded">
-                <TrendingUp className="w-3 h-3" />
-                <span>{stars}</span>
-              </div>
-            </>
+            <Image
+              src={image_url}
+              alt={`${title} preview`}
+              fill
+              className="object-cover"
+              unoptimized
+            />
           ) : (
             /* Fallback placeholder */
             <div className="h-full w-full flex flex-col items-center justify-center p-4 bg-gradient-to-br from-gray-100 to-gray-200">

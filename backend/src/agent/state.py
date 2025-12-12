@@ -5,7 +5,6 @@ class ResearchState(TypedDict, total=False):
     # 输入
     project_name: str
     readme: str
-    github_url: str
     
     # Node 1 输出
     search_queries: Annotated[list[str], operator.add]

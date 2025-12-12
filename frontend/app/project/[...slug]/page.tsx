@@ -1,5 +1,5 @@
-import ProjectViewer from "@/components/project/ProjectViewer";
-import AIAssistant from "@/components/project/AIAssistant";
+import ProjectViewer from "@/components/ProjectViewer";
+import AIAssistant from "@/components/AIAssistant";
 
 interface PageProps {
   params: Promise<{

@@ -8,26 +8,25 @@ from .prompts import query_writer_instructions, relevance_assessment_system_prom
 from langchain.chat_models import init_chat_model
 
 from tavily import TavilyClient
-from typing import Dict
-
 def get_llm():
     return init_chat_model(model="gpt-5-mini", temperature=0)
 
 def generate_queries(state: ResearchState) -> ResearchState:
-    """生成3个不同维度的搜索查询"""
+    """生成搜索查询"""
     
     messages = query_writer_instructions.format_messages(
         project_name=state['project_name'],
-        github_url=state['github_url'],
-        readme_preview=state['readme'][:500]
+        readme=state['readme']
     )
 
     llm = get_llm()
     
-    # response = llm.with_structured_output(SearchQueryList).invoke(messages)
-    
-    # return {'search_queries': response.query}
-    return {'search_queries': [state['project_name']]}
+    response = llm.with_structured_output(SearchQueryList).invoke(messages)
+
+    print(f"🔍 Generated search queries: {response.query}")
+
+    return {'search_queries': response.query}
+    # return {'search_queries': [state['project_name']]}
 
 def to_web_research(state: ResearchState):
     """LangGraph node that sends the search queries to the web research node.
@@ -74,7 +73,7 @@ def filter_irrelevant_results(state: ResearchState) -> ResearchState:
     
     prompt = relevance_assessment_system_prompt.format_messages(
         project_name=state['project_name'],
-        readme_preview=state['readme'][:500],
+        readme=state['readme'],
         search_results=search_results_text
     )
     
@@ -125,7 +124,6 @@ def generate_final_summary(state: ResearchState) -> ResearchState:
     # 构建 prompt
     messages = final_summary_prompt.format_messages(
         project_name=state['project_name'],
-        github_url=state['github_url'],
         readme=state['readme'],
         filtered_results=results_text
     )
@@ -154,7 +152,6 @@ def generate_final_summary(state: ResearchState) -> ResearchState:
     # 写入文件
     with open(filepath, 'w', encoding='utf-8') as f:
         f.write(f"# {state['project_name']}\n\n")
-        f.write(f"**GitHub URL:** {state['github_url']}\n\n")
         f.write(f"**生成时间:** {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n\n")
         f.write("---\n\n")
         f.write(final_summary)
@@ -169,7 +166,6 @@ def test_generate_final_summary(state: ResearchState) -> ResearchState:
     # 构建 prompt
     messages = test_summary_prompt.format_messages(
         project_name=state['project_name'],
-        github_url=state['github_url'],
         readme=state['readme']
     )
     
@@ -196,7 +192,6 @@ def test_generate_final_summary(state: ResearchState) -> ResearchState:
     # 写入文件
     with open(filepath, 'w', encoding='utf-8') as f:
         f.write(f"# {state['project_name']} (测试版)\n\n")
-        f.write(f"**GitHub URL:** {state['github_url']}\n\n")
         f.write(f"**生成时间:** {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n\n")
         f.write("**注意：** 这是基于 README 的测试版本总结，未包含网络搜索结果。\n\n")
         f.write("---\n\n")

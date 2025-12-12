@@ -32,24 +32,68 @@ class GitHubClient:
         language: Optional[str] = None,
         limit: int = 10,
     ) -> List[Dict]:
-        """获取新项目"""
+        """获取新项目
+        
+        Args:
+            days: 查询最近几天的项目
+            min_stars: 最小 star 数
+            language: 编程语言过滤（可选）
+            limit: 返回项目数量限制（最多1000，受GitHub API限制）
+        
+        Returns:
+            项目列表
+        """
         start_date = (datetime.now() - timedelta(days=days)).strftime("%Y-%m-%d")
         query = f"created:>{start_date} stars:>={min_stars}"
         if language:
             query += f" language:{language}"
 
         url = "https://api.github.com/search/repositories"
-        params = {
-            "q": query,
-            "sort": "stars",
-            "order": "desc",
-            "per_page": min(limit, 100),
-        }
-
+        
+        # GitHub API 限制：per_page 最大 100，总结果最多 1000
+        max_per_page = 100
+        max_total_results = 1000
+        actual_limit = min(limit, max_total_results)
+        
+        all_items = []
+        page = 1
+        per_page = min(max_per_page, actual_limit)
+        
         try:
-            response = requests.get(url, params=params, headers=self.headers)
-            response.raise_for_status()
-            return response.json().get("items", [])
+            while len(all_items) < actual_limit:
+                # 计算当前页需要获取的数量
+                remaining = actual_limit - len(all_items)
+                current_per_page = min(per_page, remaining)
+                
+                params = {
+                    "q": query,
+                    "per_page": current_per_page,
+                    "page": page,
+                }
+                
+                response = requests.get(url, params=params, headers=self.headers)
+                response.raise_for_status()
+                data = response.json()
+                items = data.get("items", [])
+                
+                if not items:
+                    # 没有更多结果了
+                    break
+                
+                all_items.extend(items)
+                
+                # 如果当前页返回的数量少于请求的数量，说明已经是最后一页
+                if len(items) < current_per_page:
+                    break
+                
+                page += 1
+                
+                # 防止无限循环（最多10页，因为最多1000条结果）
+                if page > 10:
+                    break
+            
+            return all_items[:actual_limit]
+            
         except requests.exceptions.RequestException as e:
             print(f"❌ 获取GitHub项目失败: {e}")
             return []
