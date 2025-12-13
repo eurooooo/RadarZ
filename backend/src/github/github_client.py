@@ -203,3 +203,71 @@ class GitHubClient:
             print(f"❌ 获取 README 失败: {e}")
             return None
 
+    def search_repositories(
+        self,
+        query: str,
+        limit: int = 30,
+        sort: str = "stars",
+        order: str = "desc"
+    ) -> List[Dict]:
+        """
+        搜索 GitHub 仓库
+        
+        Args:
+            query: 搜索查询字符串（支持 GitHub 搜索语法）
+            limit: 返回结果数量限制（最多 1000，受 GitHub API 限制）
+            sort: 排序方式，可选 "stars", "forks", "help-wanted-issues", "updated"
+            order: 排序顺序，可选 "desc" 或 "asc"
+        
+        Returns:
+            仓库列表
+        """
+        url = "https://api.github.com/search/repositories"
+        
+        # GitHub API 限制：per_page 最大 100，总结果最多 1000
+        max_per_page = 100
+        max_total_results = 1000
+        actual_limit = min(limit, max_total_results)
+        
+        all_items = []
+        page = 1
+        per_page = min(max_per_page, actual_limit)
+        
+        try:
+            while len(all_items) < actual_limit:
+                remaining = actual_limit - len(all_items)
+                current_per_page = min(per_page, remaining)
+                
+                params = {
+                    "q": query,
+                    "sort": sort,
+                    "order": order,
+                    "per_page": current_per_page,
+                    "page": page,
+                }
+                
+                response = requests.get(url, params=params, headers=self.headers)
+                response.raise_for_status()
+                data = response.json()
+                items = data.get("items", [])
+                
+                if not items:
+                    break
+                
+                all_items.extend(items)
+                
+                if len(items) < current_per_page:
+                    break
+                
+                page += 1
+                
+                # 防止无限循环
+                if page > 10:
+                    break
+            
+            return all_items[:actual_limit]
+            
+        except requests.exceptions.RequestException as e:
+            print(f"❌ GitHub 搜索失败: {e}")
+            return []
+

@@ -2,14 +2,17 @@
 
 import { useState } from "react";
 
-export default function SearchBar() {
+interface SearchBarProps {
+  onSend: (query: string) => void;
+}
+
+export default function SearchBar({ onSend }: SearchBarProps) {
   const [inputValue, setInputValue] = useState("");
   const [selectedModel, setSelectedModel] = useState("GPT-5");
 
   const handleSend = () => {
     if (inputValue.trim()) {
-      // Handle send action
-      console.log("Sending:", inputValue);
+      onSend(inputValue.trim());
     }
   };
 

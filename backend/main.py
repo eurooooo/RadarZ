@@ -1,14 +1,17 @@
 from typing import List, Optional
 import os
+import json
 from datetime import datetime
 from pathlib import Path
 from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import StreamingResponse
 
 from src.models import Project
 from src.github import ProjectService
 from src.agent.graph import graph
+from src.searchagent.graph import graph as search_graph
 load_dotenv()
 
 app = FastAPI()
@@ -71,6 +74,102 @@ async def get_summary(
     result = graph.invoke(input_data)
     return {"repo": repo_name, "summary": result['final_summary']}
 
+@app.get("/search")
+async def search(
+    user_input: str = Query(..., description="用户输入"),
+):
+    """搜索 GitHub 项目，流式返回结果"""
+    
+    async def generate():
+        try:
+            # 初始化状态
+            initial_state = {"user_input": user_input}
+            
+            # 用于跟踪已发送的项目，避免重复发送
+            sent_projects = set()
+            
+            # 使用 astream 来流式执行 graph
+            async for event in search_graph.astream(initial_state):
+                # 发送每个节点的更新
+                for node_name, node_output in event.items():
+                    if node_name == "generate_search_queries":
+                        # 发送搜索查询
+                        search_queries = node_output.get("search_queries", [])
+                        if search_queries:
+                            yield f"data: {json.dumps({'type': 'search_queries', 'data': search_queries}, ensure_ascii=False)}\n\n"
+                    
+                    elif node_name == "search_github":
+                        # 发送搜索进度
+                        github_results = node_output.get("github_results", [])
+                        if github_results:
+                            yield f"data: {json.dumps({'type': 'search_progress', 'data': {'total': len(github_results)}}, ensure_ascii=False)}\n\n"
+                    
+                    elif node_name == "validate_project":
+                        # 流式发送验证后的项目（并行验证，每个项目验证完成后立即发送）
+                        validated_projects = node_output.get("validated_projects", [])
+                        # 每个 validate_project 节点只返回一个项目，取最后一个确保是最新验证的
+                        if validated_projects:
+                            project = validated_projects[-1]
+                            full_name = project.get("full_name", "")
+                            if full_name and full_name not in sent_projects:
+                                sent_projects.add(full_name)
+                                
+                                # 格式化日期
+                                updated_at = project.get("updated_at", "")
+                                date_str = "未知时间"
+                                if updated_at:
+                                    try:
+                                        date_obj = datetime.fromisoformat(updated_at.replace("Z", "+00:00"))
+                                        now = datetime.now(date_obj.tzinfo) if date_obj.tzinfo else datetime.now()
+                                        delta = now - date_obj
+                                        if delta.days > 0:
+                                            date_str = f"{delta.days} 天前"
+                                        elif delta.seconds >= 3600:
+                                            hours = delta.seconds // 3600
+                                            date_str = f"{hours} 小时前"
+                                        elif delta.seconds >= 60:
+                                            minutes = delta.seconds // 60
+                                            date_str = f"{minutes} 分钟前"
+                                        else:
+                                            date_str = "刚刚"
+                                    except Exception:
+                                        date_str = "未知时间"
+                                
+                                # 转换为 Project 格式
+                                language = project.get("language")
+                                tags = project.get("topics", [])
+                                if language and language not in tags:
+                                    tags.append(language.lower())
+                                
+                                project_data = {
+                                    "id": full_name,
+                                    "title": full_name,
+                                    "authors": project.get("owner", {}).get("login", "Unknown"),
+                                    "date": date_str,
+                                    "description": project.get("description", "") or "无描述",
+                                    "tags": tags[:10],
+                                    "stars": project.get("stargazers_count", 0),
+                                    "forks": project.get("forks_count", 0),
+                                    "image_url": f"https://opengraph.githubassets.com/1/{full_name}" if full_name else None,
+                                    "validation_reason": project.get("validation_reason", ""),
+                                }
+                                yield f"data: {json.dumps({'type': 'project', 'data': project_data}, ensure_ascii=False)}\n\n"
+            
+            # 发送完成信号
+            yield f"data: {json.dumps({'type': 'complete', 'data': {'total': len(sent_projects)}}, ensure_ascii=False)}\n\n"
+        
+        except Exception as e:
+            yield f"data: {json.dumps({'type': 'error', 'data': str(e)}, ensure_ascii=False)}\n\n"
+    
+    return StreamingResponse(
+        generate(),
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "Connection": "keep-alive",
+            "X-Accel-Buffering": "no",
+        }
+    )
 
 @app.get("/new")
 async def get_new_projects() -> int:
