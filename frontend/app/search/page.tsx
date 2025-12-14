@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import SearchBar from "@/components/SearchBar";
 import SearchContainer from "@/components/SearchContainer";
 import { useSearch } from "@/hooks/useSearch";
@@ -12,10 +12,11 @@ export default function Page() {
 
   // 处理搜索发送
   const handleSend = (query: string) => {
-    if (query.trim()) {
-      setSearchQuery(query.trim());
+    const trimmedQuery = query.trim();
+    if (trimmedQuery) {
+      setSearchQuery(trimmedQuery);
       setShowSearchBar(false);
-      performSearch(query.trim());
+      performSearch(trimmedQuery);
     }
   };
 
