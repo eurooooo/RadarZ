@@ -8,8 +8,13 @@ from .prompts import query_writer_instructions, relevance_assessment_system_prom
 from langchain.chat_models import init_chat_model
 
 from tavily import TavilyClient
+
+MODEL_NAME = os.getenv("MODEL_NAME")
+MODEL_PROVIDER = os.getenv("MODEL_PROVIDER") or None
+
 def get_llm():
-    return init_chat_model(model="gpt-5-mini", temperature=0)
+    return init_chat_model(model=MODEL_NAME, model_provider=MODEL_PROVIDER, temperature=0)
+
 
 def generate_queries(state: ResearchState) -> ResearchState:
     """生成搜索查询"""

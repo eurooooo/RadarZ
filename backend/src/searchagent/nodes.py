@@ -10,8 +10,12 @@ from src.github.github_client import GitHubClient
 from langgraph.graph import END
 
 
+MODEL_NAME = os.getenv("MODEL_NAME")
+MODEL_PROVIDER = os.getenv("MODEL_PROVIDER") or None
+
 def get_llm():
-    return init_chat_model(model="gpt-5-mini", temperature=0)
+    return init_chat_model(model=MODEL_NAME, model_provider=MODEL_PROVIDER, temperature=0)
+
 
 
 def generate_search_queries(state: OverallState) -> OverallState:

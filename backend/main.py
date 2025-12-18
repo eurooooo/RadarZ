@@ -12,6 +12,7 @@ from src.models import Project
 from src.github import ProjectService
 from src.agent.graph import graph
 from src.searchagent.graph import graph as search_graph
+from src.React.graph import graph as react_graph
 load_dotenv()
 
 app = FastAPI()
@@ -55,24 +56,80 @@ async def summarize_readme_get(
 
     return {"repo": repo_name, "summary": readme_text}
 
+# @app.get("/summary")
+# async def get_summary(
+#     repo_name: str = Query(..., description="仓库全名，如 owner/repo"),
+# ):
+#     """
+#     GET 方式获取 README 摘要，便于前端直接调用。
+#     使用传统的 LangGraph 工作流。
+#     """
+#     readme_text = project_service.get_repository_readme(repo_name, None)
+#     if not readme_text:
+#         raise HTTPException(
+#             status_code=404, detail="缺少 README 内容，且无法通过仓库名获取。"
+#         )
+#     input_data = {
+#         "project_name": repo_name,
+#         "readme": readme_text,
+#     }
+#     result = graph.invoke(input_data)
+#     return {"repo": repo_name, "summary": result['final_summary']}
+
 @app.get("/summary")
 async def get_summary(
     repo_name: str = Query(..., description="仓库全名，如 owner/repo"),
+    max_steps: int = Query(10, description="最大执行步骤数，默认 10"),
 ):
     """
-    GET 方式获取 README 摘要，便于前端直接调用。
+    使用 ReAct 框架生成项目总结。
+    
+    ReAct 框架通过思考-行动-观察的循环来完成研究任务：
+    1. Think（思考）：分析当前状态，决定下一步行动
+    2. Act（行动）：执行动作（搜索、过滤、总结）
+    3. Observe（观察）：观察结果，决定是否继续
+    
+    参数：
+    - repo_name: GitHub 仓库全名，如 "owner/repo"
+    - max_steps: 最大执行步骤数，防止无限循环，默认 10
     """
     readme_text = project_service.get_repository_readme(repo_name, None)
     if not readme_text:
         raise HTTPException(
             status_code=404, detail="缺少 README 内容，且无法通过仓库名获取。"
         )
+    
+    # 初始化 ReAct 状态
     input_data = {
         "project_name": repo_name,
         "readme": readme_text,
+        "step_count": 0,
+        "max_steps": max_steps,
+        "should_continue": True,
     }
-    result = graph.invoke(input_data)
-    return {"repo": repo_name, "summary": result['final_summary']}
+    
+    # 执行 ReAct 工作流
+    try:
+        result = react_graph.invoke(input_data)
+        
+        # 检查是否成功生成总结
+        if not result.get('final_summary'):
+            raise HTTPException(
+                status_code=500,
+                detail=f"ReAct 框架未能生成总结。步骤数: {result.get('step_count', 0)}/{max_steps}"
+            )
+        
+        return {
+            "repo": repo_name,
+            "summary": result['final_summary'],
+            "steps": result.get('step_count', 0),
+            "thoughts": result.get('thoughts', []),
+        }
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"ReAct 框架执行失败: {str(e)}"
+        )
 
 @app.get("/search")
 async def search(
