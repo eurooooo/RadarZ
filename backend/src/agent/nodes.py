@@ -9,7 +9,7 @@ from langchain.chat_models import init_chat_model
 
 from tavily import TavilyClient
 def get_llm():
-    return init_chat_model(model="gpt-5-mini", temperature=0)
+    return init_chat_model(model=os.getenv("MODEL_NAME"), model_provider=os.getenv("MODEL_PROVIDER"), temperature=0)
 
 def generate_queries(state: ResearchState) -> ResearchState:
     """生成搜索查询"""

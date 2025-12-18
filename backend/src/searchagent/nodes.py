@@ -11,7 +11,7 @@ from langgraph.graph import END
 
 
 def get_llm():
-    return init_chat_model(model="gpt-5-mini", temperature=0)
+    return init_chat_model(model=os.getenv("MODEL_NAME"), model_provider=os.getenv("MODEL_PROVIDER"), temperature=0)
 
 
 def generate_search_queries(state: OverallState) -> OverallState:
@@ -23,7 +23,7 @@ def generate_search_queries(state: OverallState) -> OverallState:
     response = llm.with_structured_output(SearchQueryList).invoke(messages)
     print(f"🔍 Generated search queries: {response.query}")
     # return {'search_queries': response.query}
-    return {'search_queries': ['llm from scratch', 'llm training']}
+    return {'search_queries': response.query}
 
 
 def search_github(state: OverallState) -> OverallState:
