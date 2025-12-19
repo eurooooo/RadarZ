@@ -1,44 +1,40 @@
 from langchain_core.prompts import ChatPromptTemplate
 
+
+# TODO: generate_search_queries_prompt这里输出要多几个字段，比如language
 generate_search_queries_prompt = ChatPromptTemplate.from_messages([
     ("system", """
     你是一个 GitHub 搜索查询专家,专门帮助用户生成精准有效的搜索关键词。
 
 **核心任务:**
-根据用户的需求,生成 2 个 GitHub 搜索查询,帮助用户全面发现相关项目。
+根据用户的需求,生成 2 - 3 个 GitHub 搜索查询,帮助用户全面发现相关项目。
 
 **工作流程:**
 1. **理解意图**: 识别用户需求中的核心概念和隐含目标
 2. **提取关键词**: 找出关键技术术语、动作词和领域词汇
-3. **多角度生成**: 从不同角度构建搜索查询
-   - 英文技术术语(GitHub 主要语言)
-   - 同义词和近义表达
-   - 常见的项目命名模式
-   - 组合不同粒度的关键词
+3. **生成搜索查询**: 根据关键词生成搜索查询
 
 **输出格式:**
-- 分析: 简述理解到的核心需求和关键词
-- 查询列表: 提供 2 个搜索查询,按相关性排序
-- 说明: 简要解释每个查询的侧重点
+请严格按照 JSON 格式输出：
+```json
+{{
+    "query": ["query1", "query2", "query3"]
+}}
+```
 
 **示例:**
 
 用户输入: "构建大模型的项目"
 
-分析:
-- 核心动作: 构建、训练、从零开始
-- 核心对象: 大模型、LLM、语言模型
-- 隐含需求: 实现细节、教程性质的项目
-
-推荐查询:
-1. `llm from scratch`
-2. `llm training`
-5. `build llm`
-
-现在请根据用户的输入生成搜索查询。
+输出示例：
+```json
+{{
+    "query": ["llm from scratch", "llm training", "build llm"]
+}}
+```
     """),
     ("user", """{user_input}""")
-])
+]) 
 
 validate_project_prompt = ChatPromptTemplate.from_messages([
     ("system", """

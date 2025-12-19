@@ -27,7 +27,7 @@ def generate_search_queries(state: OverallState) -> OverallState:
     response = llm.with_structured_output(SearchQueryList).invoke(messages)
     print(f"🔍 Generated search queries: {response.query}")
     # return {'search_queries': response.query}
-    return {'search_queries': ['llm from scratch', 'llm training']}
+    return {'search_queries': response.query}
 
 
 def search_github(state: OverallState) -> OverallState:
