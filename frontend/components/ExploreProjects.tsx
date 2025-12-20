@@ -18,7 +18,7 @@ export interface Project {
 
 async function fetchProjects(): Promise<Project[]> {
   const res = await fetch(`${BACKEND_BASE_URL}/projects`, {
-    // next: { revalidate: 3600 },
+    next: { revalidate: 3600 },
   });
 
   if (!res.ok) {

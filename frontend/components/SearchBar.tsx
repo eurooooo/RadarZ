@@ -8,7 +8,6 @@ interface SearchBarProps {
 
 export default function SearchBar({ onSend }: SearchBarProps) {
   const [inputValue, setInputValue] = useState("");
-  const [selectedModel, setSelectedModel] = useState("GPT-5");
 
   const handleSend = () => {
     if (inputValue.trim()) {
@@ -25,18 +24,29 @@ export default function SearchBar({ onSend }: SearchBarProps) {
   ];
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen px-6 py-12">
-      {/* Greeting */}
-      <div className="mb-8 flex items-center gap-3">
-        <img src="/logo.svg" alt="Logo" className="w-10 h-10" />
-        <h1 className="text-4xl font-serif text-foreground">RadarZ</h1>
-      </div>
+    <div className="flex flex-col items-center justify-center w-full h-full min-h-screen px-6 py-8 relative">
+      {/* Gradient Background */}
+      <div className="absolute top-0 left-0 right-0 h-80 bg-gradient-to-b from-primary/15 via-primary/8 to-transparent pointer-events-none" />
 
-      {/* Main Search Container */}
-      <div className="w-full max-w-4xl">
-        <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-4 mb-6">
-          {/* Input Area */}
-          <div className="mb-3">
+      {/* Content */}
+      <div className="relative z-10 w-full max-w-4xl">
+        {/* Greeting */}
+        <div className="mb-8 text-center">
+          <div className="mb-4 flex items-center justify-center gap-3">
+            <img src="/logo.svg" alt="Logo" className="w-10 h-10" />
+            <h1 className="text-4xl font-serif text-foreground">RadarZ</h1>
+          </div>
+          <p className="text-base text-gray-600 max-w-2xl mx-auto">
+            Based on user intent verification. Ideal for researchers conducting
+            literature reviews with specific criteria, such as a specific task
+            or dataset.
+          </p>
+        </div>
+
+        {/* Main Search Container */}
+        <div className="w-full">
+          <div className="bg-white rounded-full shadow-sm border border-gray-100 px-4 py-3 mb-6 flex items-center gap-3">
+            {/* Input Area */}
             <input
               type="text"
               value={inputValue}
@@ -48,100 +58,42 @@ export default function SearchBar({ onSend }: SearchBarProps) {
                 }
               }}
               placeholder="Search for projects ..."
-              className="w-full text-lg text-foreground placeholder:text-gray-400 bg-transparent border-none outline-none focus:outline-none"
+              className="flex-1 text-lg text-foreground placeholder:text-gray-400 bg-transparent border-none outline-none focus:outline-none"
             />
-          </div>
 
-          {/* Bottom Controls */}
-          <div className="flex items-center justify-between">
-            {/* Left Controls */}
-            <div className="flex items-center gap-2">
-              <button className="w-7 h-7 rounded-lg bg-gray-50 border border-gray-200 flex items-center justify-center hover:bg-gray-100 transition-colors">
-                <svg
-                  className="w-3.5 h-3.5 text-gray-600"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-                  />
-                </svg>
-              </button>
-              <button className="w-7 h-7 rounded-lg bg-gray-50 border border-gray-200 flex items-center justify-center hover:bg-gray-100 transition-colors">
-                <svg
-                  className="w-3.5 h-3.5 text-gray-600"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                  />
-                </svg>
-              </button>
-            </div>
-
-            {/* Right Controls */}
-            <div className="flex items-center gap-3">
-              {/* Model Selector */}
-              <div className="flex items-center gap-1 cursor-pointer hover:opacity-80 transition-opacity">
-                <span className="text-sm text-gray-600">{selectedModel}</span>
-                <svg
-                  className="w-3.5 h-3.5 text-gray-600"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M19 9l-7 7-7-7"
-                  />
-                </svg>
-              </div>
-
-              {/* Send Button */}
-              <button
-                onClick={handleSend}
-                disabled={!inputValue.trim()}
-                className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center hover:bg-primary-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <svg
-                  className="w-5 h-5 text-white"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M13 7l5 5m0 0l-5 5m5-5H6"
-                  />
-                </svg>
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {/* Prompt Suggestions */}
-        <div className="flex items-center justify-center gap-3 flex-wrap">
-          {promptSuggestions.map((prompt, index) => (
+            {/* Send Button */}
             <button
-              key={index}
-              className="px-4 py-2 rounded-full bg-white border border-gray-200 text-sm text-gray-700 hover:bg-gray-50 transition-colors flex items-center gap-2"
+              onClick={handleSend}
+              disabled={!inputValue.trim()}
+              className="w-10 h-10 rounded-full bg-primary flex items-center justify-center hover:bg-primary-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed shrink-0"
             >
-              <span>{prompt.label}</span>
+              <svg
+                className="w-5 h-5 text-white"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M13 7l5 5m0 0l-5 5m5-5H6"
+                />
+              </svg>
             </button>
-          ))}
+          </div>
+
+          {/* Prompt Suggestions */}
+          <div className="flex items-center justify-center gap-3 flex-wrap">
+            {promptSuggestions.map((prompt, index) => (
+              <button
+                key={index}
+                className="px-4 py-2 rounded-full bg-white border border-gray-200 text-sm text-gray-700 hover:bg-gray-50 transition-colors flex items-center gap-2"
+              >
+                <span>{prompt.label}</span>
+              </button>
+            ))}
+          </div>
         </div>
       </div>
     </div>

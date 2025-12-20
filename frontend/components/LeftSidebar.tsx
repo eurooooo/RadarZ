@@ -32,21 +32,21 @@ export default function LeftSidebar() {
                   : "text-gray-600 hover:text-foreground"
               }`}
             >
-              <Compass className="w-5 h-5" />
-              <span>Explore</span>
+              <Search className="w-5 h-5" />
+              <span>Search</span>
             </Link>
           </li>
           <li>
             <Link
-              href="/search"
+              href="/explore"
               className={`flex items-center gap-3 px-4 py-2 rounded-lg font-medium transition-colors ${
-                pathname === "/search"
+                pathname === "/explore"
                   ? "bg-gray-100 text-foreground"
                   : "text-gray-600 hover:text-foreground"
               }`}
             >
-              <Search className="w-5 h-5" />
-              <span>Search</span>
+              <Compass className="w-5 h-5" />
+              <span>Explore</span>
             </Link>
           </li>
         </ul>
