@@ -4,13 +4,11 @@ export interface Project {
   id: string;
   title: string;
   authors: string;
-  date: string;
   description: string;
   tags: string[];
   stars: number;
   forks: number;
-  image_url?: string | null;
-  validation_reason?: string;
+  language?: string | null;
 }
 
 export interface SearchState {

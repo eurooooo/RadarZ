@@ -92,12 +92,11 @@ class ProjectService:
             id=full_name or repo.get("html_url", ""),
             title=repo_name,
             authors=authors,
-            date=date_str,
             description=description,
             tags=tags[:10],  # 限制标签数量
             stars=repo.get("stargazers_count", 0),
             forks=repo.get("forks_count", 0),
-            image_url=image_url,
+            language=language,  # 项目主要编程语言
         )
 
     def _get_repository_image_url(self, full_name: str) -> Optional[str]:

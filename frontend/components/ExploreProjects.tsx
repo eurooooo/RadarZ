@@ -1,14 +1,24 @@
 import { Suspense } from "react";
 import ProjectCard from "./ProjectCard";
 import ProjectCardSkeleton from "./ProjectCardSkeleton";
-import { type Project } from "@/data/mockProjects";
 
 const BACKEND_BASE_URL =
   process.env.NEXT_PUBLIC_BACKEND_BASE_URL ?? "http://127.0.0.1:8000";
 
+export interface Project {
+  id: string;
+  title: string;
+  authors: string;
+  description: string;
+  tags: string[];
+  stars: number;
+  forks: number;
+  language?: string | null;
+}
+
 async function fetchProjects(): Promise<Project[]> {
   const res = await fetch(`${BACKEND_BASE_URL}/projects`, {
-    next: { revalidate: 3600 },
+    // next: { revalidate: 3600 },
   });
 
   if (!res.ok) {

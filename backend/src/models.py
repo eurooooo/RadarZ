@@ -7,10 +7,9 @@ class Project(BaseModel):
     id: str
     title: str
     authors: str
-    date: str
     description: str
     tags: list[str]
     stars: int
     forks: int
-    image_url: str | None = None  # GitHub Open Graph 图片 URL
+    language: str | None = None  # 项目主要编程语言
 

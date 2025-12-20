@@ -171,27 +171,6 @@ async def search(
                             if full_name and full_name not in sent_projects:
                                 sent_projects.add(full_name)
                                 
-                                # 格式化日期
-                                updated_at = project.get("updated_at", "")
-                                date_str = "未知时间"
-                                if updated_at:
-                                    try:
-                                        date_obj = datetime.fromisoformat(updated_at.replace("Z", "+00:00"))
-                                        now = datetime.now(date_obj.tzinfo) if date_obj.tzinfo else datetime.now()
-                                        delta = now - date_obj
-                                        if delta.days > 0:
-                                            date_str = f"{delta.days} 天前"
-                                        elif delta.seconds >= 3600:
-                                            hours = delta.seconds // 3600
-                                            date_str = f"{hours} 小时前"
-                                        elif delta.seconds >= 60:
-                                            minutes = delta.seconds // 60
-                                            date_str = f"{minutes} 分钟前"
-                                        else:
-                                            date_str = "刚刚"
-                                    except Exception:
-                                        date_str = "未知时间"
-                                
                                 # 转换为 Project 格式
                                 language = project.get("language")
                                 tags = project.get("topics", [])
@@ -205,13 +184,11 @@ async def search(
                                     "id": full_name,
                                     "title": repo_name,
                                     "authors": project.get("owner", {}).get("login", "Unknown"),
-                                    "date": date_str,
                                     "description": project.get("description", "") or "",
                                     "tags": tags[:10],
                                     "stars": project.get("stargazers_count", 0),
                                     "forks": project.get("forks_count", 0),
-                                    "image_url": f"https://opengraph.githubassets.com/1/{full_name}" if full_name else None,
-                                    "validation_reason": project.get("validation_reason", ""),
+                                    "language": language,
                                 }
                                 yield f"data: {json.dumps({'type': 'project', 'data': project_data}, ensure_ascii=False)}\n\n"
             
