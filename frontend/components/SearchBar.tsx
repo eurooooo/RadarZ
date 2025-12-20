@@ -38,7 +38,8 @@ export default function SearchBar({ onSend }: SearchBarProps) {
             <h1 className="text-4xl font-serif text-foreground">搜索灵感</h1>
           </div>
           <p className="text-base text-gray-600 max-w-2xl mx-auto">
-            基于用户意图验证。适合研究人员根据特定标准进行文献综述，如特定任务或数据集。
+            智能分析您的搜索需求，精准推荐符合标准的 GitHub
+            项目，如特定技术栈或功能特性。
           </p>
         </div>
 
