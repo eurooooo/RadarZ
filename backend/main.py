@@ -198,12 +198,15 @@ async def search(
                                 if language and language not in tags:
                                     tags.append(language.lower())
                                 
+                                # 提取仓库名称（不包含owner）
+                                repo_name = project.get("name", "") or (full_name.split("/")[-1] if "/" in full_name else full_name)
+                                
                                 project_data = {
                                     "id": full_name,
-                                    "title": full_name,
+                                    "title": repo_name,
                                     "authors": project.get("owner", {}).get("login", "Unknown"),
                                     "date": date_str,
-                                    "description": project.get("description", "") or "无描述",
+                                    "description": project.get("description", "") or "",
                                     "tags": tags[:10],
                                     "stars": project.get("stargazers_count", 0),
                                     "forks": project.get("forks_count", 0),

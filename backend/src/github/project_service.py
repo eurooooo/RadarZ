@@ -67,13 +67,15 @@ class ProjectService:
         # 获取作者（通常是仓库所有者的用户名）
         authors = repo.get("owner", {}).get("login", "Unknown")
         full_name = repo.get("full_name", "")
+        # 提取仓库名称（不包含owner）
+        repo_name = repo.get("name", "") or (full_name.split("/")[-1] if "/" in full_name else full_name)
 
         # 格式化日期（使用 updated_at，因为这是 trending 的依据）
         updated_at = repo.get("updated_at", "")
         date_str = self._format_date(updated_at)
 
         # 获取描述
-        description = repo.get("description", "") or "无描述"
+        description = repo.get("description", "") or ""
 
         # 获取标签（topics + language）
         tags = repo.get("topics", [])
@@ -88,7 +90,7 @@ class ProjectService:
         return Project(
             # 使用仓库全名作为稳定 ID，避免列表重排导致 ID 变化
             id=full_name or repo.get("html_url", ""),
-            title=full_name,
+            title=repo_name,
             authors=authors,
             date=date_str,
             description=description,

@@ -42,9 +42,9 @@ def search_github(state: OverallState) -> OverallState:
         print(f"🔍 Searching GitHub with query: {query}")
         results = github_client.search_repositories(
             query=query,
-            limit=2,  # 每个查询最多返回 20 个结果
-            sort="stars",
-            order="desc"
+            limit=5,
+            # sort="stars",
+            # order="desc"
         )
         all_results.extend(results)
         print(f"   Found {len(results)} repositories")

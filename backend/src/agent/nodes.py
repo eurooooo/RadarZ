@@ -14,11 +14,7 @@ MODEL_PROVIDER = os.getenv("MODEL_PROVIDER") or None
 
 def get_llm():
     return init_chat_model(model=MODEL_NAME, model_provider=MODEL_PROVIDER, temperature=0)
-<<<<<<< HEAD
-
-=======
->>>>>>> 27e839ceec6efa71d9ea657f074c031db3f29ad2
-
+    
 def generate_queries(state: ResearchState) -> ResearchState:
     """生成搜索查询"""
     

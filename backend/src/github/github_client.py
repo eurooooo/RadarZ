@@ -150,7 +150,7 @@ class GitHubClient:
         """获取项目详细信息"""
         return {
             "name": repo["full_name"],
-            "description": repo.get("description", "") or "无描述",
+            "description": repo.get("description", "") or "",
             "stars": repo["stargazers_count"],
             "language": repo.get("language", "Unknown"),
             "topics": repo.get("topics", []),
