@@ -13,11 +13,11 @@ export default function WorkingFlow({ state }: WorkingFlowProps) {
       {/* Summary Stats */}
       <div className="mb-6 space-y-2 text-sm">
         <div className="flex justify-between">
-          <span className="text-gray-600">Total Paper:</span>
+          <span className="text-gray-600">总项目数：</span>
           <span className="font-medium">{state.searchProgress}</span>
         </div>
         <div className="flex justify-between">
-          <span className="text-gray-600">Verified Paper:</span>
+          <span className="text-gray-600">已验证项目：</span>
           <span className="font-medium">{state.projects.length}</span>
         </div>
       </div>
@@ -32,7 +32,7 @@ export default function WorkingFlow({ state }: WorkingFlowProps) {
                 : "text-gray-300"
             }`}
           />
-          <span className="font-medium">1 Analysing Questions</span>
+          <span className="font-medium">1 分析问题</span>
         </div>
         {state.searchQueries.length > 0 && (
           <div className="ml-7 space-y-1">
@@ -53,7 +53,7 @@ export default function WorkingFlow({ state }: WorkingFlowProps) {
               state.validatingCriteria ? "text-green-500" : "text-gray-300"
             }`}
           />
-          <span className="font-medium">2 Validating Criteria</span>
+          <span className="font-medium">2 验证标准</span>
         </div>
         {state.validatingCriteria && (
           <div className="ml-7 text-sm text-gray-700">
@@ -70,7 +70,7 @@ export default function WorkingFlow({ state }: WorkingFlowProps) {
               state.projects.length > 0 ? "text-green-500" : "text-gray-300"
             }`}
           />
-          <span className="font-medium">3 Searching & Validating</span>
+          <span className="font-medium">3 搜索与验证</span>
         </div>
         {state.projects.length > 0 && (
           <div className="ml-7 space-y-2">
@@ -84,7 +84,7 @@ export default function WorkingFlow({ state }: WorkingFlowProps) {
             ))}
             {state.projects.length > 5 && (
               <div className="text-xs text-gray-500">
-                +{state.projects.length - 5} more
+                +{state.projects.length - 5} 更多
               </div>
             )}
           </div>

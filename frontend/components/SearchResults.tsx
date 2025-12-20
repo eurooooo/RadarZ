@@ -12,7 +12,7 @@ export default function SearchResults({ state }: SearchResultsProps) {
   return (
     <>
       <div className="text-sm text-gray-600 mb-6">
-        Totally: {state.projects.length}
+        总计：{state.projects.length}
       </div>
 
       {/* Results */}
@@ -30,7 +30,7 @@ export default function SearchResults({ state }: SearchResultsProps) {
               {project.validation_reason && (
                 <div className="absolute top-2 right-2 bg-green-100 text-green-800 px-2 py-1 rounded text-xs flex items-center gap-1">
                   <Check className="w-3 h-3" />
-                  Perfect
+                  完美匹配
                 </div>
               )}
             </div>
@@ -40,7 +40,7 @@ export default function SearchResults({ state }: SearchResultsProps) {
 
       {state.isComplete && state.projects.length === 0 && (
         <div className="text-center py-12 text-gray-500">
-          No projects found matching your criteria.
+          未找到符合您条件的项目。
         </div>
       )}
     </>

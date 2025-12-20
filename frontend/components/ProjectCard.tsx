@@ -24,8 +24,8 @@ export default function ProjectCard({
   language,
 }: ProjectCardProps) {
   return (
-    <Link href={`/project/${id}`} className="block max-w-2xl">
-      <div className="border border-gray-200 rounded-lg mb-4 hover:shadow-md transition-all cursor-pointer overflow-hidden p-6 flex flex-col">
+    <Link href={`/project/${id}`} className="block">
+      <div className="border border-gray-200 rounded-lg hover:shadow-md transition-all cursor-pointer overflow-hidden p-6 flex flex-col h-full">
         {/* Header */}
         <div className="mb-3">
           <h2 className="text-xl font-bold text-primary mb-2">{title}</h2>

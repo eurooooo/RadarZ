@@ -33,7 +33,7 @@ export default function LeftSidebar() {
               }`}
             >
               <Search className="w-5 h-5" />
-              <span>Search</span>
+              <span>搜索</span>
             </Link>
           </li>
           <li>
@@ -46,7 +46,7 @@ export default function LeftSidebar() {
               }`}
             >
               <Compass className="w-5 h-5" />
-              <span>Explore</span>
+              <span>探索</span>
             </Link>
           </li>
         </ul>

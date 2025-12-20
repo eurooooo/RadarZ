@@ -32,11 +32,11 @@ async function ProjectsList() {
   const projects = await fetchProjects();
 
   if (projects.length === 0) {
-    return <p className="text-sm text-gray-500">No projects found.</p>;
+    return <p className="text-sm text-gray-500">未找到项目。</p>;
   }
 
   return (
-    <div>
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
       {projects.map((project) => (
         <ProjectCard key={project.id} {...project} />
       ))}
@@ -47,11 +47,11 @@ async function ProjectsList() {
 export default function ExploreProjects() {
   return (
     <div>
-      <h1 className="text-2xl font-bold text-primary mb-6">Explore Projects</h1>
+      <h1 className="text-2xl font-bold text-primary mb-6">探索项目</h1>
 
       <Suspense
         fallback={
-          <div>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {Array.from({ length: 5 }).map((_, index) => (
               <ProjectCardSkeleton key={index} />
             ))}

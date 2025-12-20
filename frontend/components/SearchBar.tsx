@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { Sparkles } from "lucide-react";
 
 interface SearchBarProps {
   onSend: (query: string) => void;
@@ -16,11 +17,11 @@ export default function SearchBar({ onSend }: SearchBarProps) {
   };
 
   const promptSuggestions = [
-    { label: "AI Agent" },
-    { label: "Web Dev" },
-    { label: "LLM" },
-    { label: "Chatbot" },
-    { label: "AI Agent" },
+    { label: "AI 智能体" },
+    { label: "Web 开发" },
+    { label: "大语言模型" },
+    { label: "聊天机器人" },
+    { label: "机器学习" },
   ];
 
   return (
@@ -33,13 +34,11 @@ export default function SearchBar({ onSend }: SearchBarProps) {
         {/* Greeting */}
         <div className="mb-8 text-center">
           <div className="mb-4 flex items-center justify-center gap-3">
-            <img src="/logo.svg" alt="Logo" className="w-10 h-10" />
-            <h1 className="text-4xl font-serif text-foreground">RadarZ</h1>
+            <Sparkles className="w-10 h-10 text-primary" />
+            <h1 className="text-4xl font-serif text-foreground">搜索灵感</h1>
           </div>
           <p className="text-base text-gray-600 max-w-2xl mx-auto">
-            Based on user intent verification. Ideal for researchers conducting
-            literature reviews with specific criteria, such as a specific task
-            or dataset.
+            基于用户意图验证。适合研究人员根据特定标准进行文献综述，如特定任务或数据集。
           </p>
         </div>
 
@@ -57,7 +56,7 @@ export default function SearchBar({ onSend }: SearchBarProps) {
                   handleSend();
                 }
               }}
-              placeholder="Search for projects ..."
+              placeholder="搜索项目..."
               className="flex-1 text-lg text-foreground placeholder:text-gray-400 bg-transparent border-none outline-none focus:outline-none"
             />
 

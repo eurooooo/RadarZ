@@ -22,13 +22,13 @@ export default function SearchContainer({
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-4">
               <button className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">
-                Q Search More
+                继续搜索
               </button>
               <button className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">
-                Share Result
+                分享结果
               </button>
               <button className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">
-                Issue Report
+                问题反馈
               </button>
             </div>
           </div>
@@ -39,7 +39,7 @@ export default function SearchContainer({
 
       {/* Right Sidebar - Working Flow */}
       <div className="w-80 bg-white border-l border-gray-200 p-6 overflow-y-auto">
-        <h2 className="text-lg font-semibold mb-4">Working Flow</h2>
+        <h2 className="text-lg font-semibold mb-4">工作流程</h2>
         <WorkingFlow state={state} />
       </div>
     </div>
