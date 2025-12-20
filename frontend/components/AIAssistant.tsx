@@ -38,24 +38,26 @@ export default function AIAssistant() {
   };
 
   return (
-    <aside className="w-[40%] fixed right-0 top-0 h-screen border-l border-gray-100 flex flex-col">
-      <div className="p-6 border-b border-gray-100">
+    <aside className="w-[40%] fixed right-0 top-0 h-screen voxel-border border-l-0 border-b-0 border-t-0 flex flex-col bg-white" style={{ boxShadow: '-4px 0px 0px 0px #808080, -8px 0px 0px 0px #1A1A1A' }}>
+      <div className="p-6 border-b-3 border-black">
         <div className="flex items-center gap-2 mb-4">
-          <Sparkles className="w-5 h-5 text-primary" />
-          <h2 className="text-lg font-semibold text-gray-900">AI Assistant</h2>
+          <div className="voxel-border bg-orange p-1.5">
+            <Sparkles className="w-5 h-5 text-white" />
+          </div>
+          <h2 className="text-lg font-bold text-black" style={{ textShadow: '2px 2px 0px #808080' }}>AI Assistant</h2>
         </div>
         <div className="flex gap-2">
-          <button className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">
+          <button className="voxel-button flex-1 px-4 py-2 bg-white text-black text-sm font-bold hover:bg-gray-light">
             Explain Code
           </button>
-          <button className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">
+          <button className="voxel-button flex-1 px-4 py-2 bg-white text-black text-sm font-bold hover:bg-gray-light">
             Summary
           </button>
         </div>
       </div>
 
       {/* Chat Messages - Scrollable */}
-      <div className="flex-1 overflow-y-auto p-6 space-y-4">
+      <div className="flex-1 overflow-y-auto p-6 space-y-4 bg-sky-blue">
         {chatMessages.map((msg, index) => (
           <div
             key={index}
@@ -64,20 +66,20 @@ export default function AIAssistant() {
             }`}
           >
             <div
-              className={`max-w-[80%] rounded-lg p-3 ${
+              className={`max-w-[80%] voxel-card p-3 ${
                 msg.role === "user"
-                  ? "bg-primary text-white"
-                  : "bg-gray-100 text-gray-900"
+                  ? "bg-orange text-white"
+                  : "bg-white text-black"
               }`}
             >
-              <p className="text-sm">{msg.content}</p>
+              <p className="text-sm font-medium">{msg.content}</p>
             </div>
           </div>
         ))}
       </div>
 
       {/* Input Area */}
-      <div className="p-6 border-t border-gray-100">
+      <div className="p-6 border-t-3 border-black bg-white">
         <div className="flex gap-2">
           <input
             type="text"
@@ -89,11 +91,11 @@ export default function AIAssistant() {
               }
             }}
             placeholder="Ask about this project..."
-            className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+            className="voxel-input flex-1 px-4 py-2 bg-white text-black font-medium placeholder:text-gray-dark"
           />
           <button
             onClick={handleSendMessage}
-            className="px-6 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors flex items-center gap-2"
+            className="voxel-button px-6 py-2 bg-red text-white font-bold flex items-center gap-2"
           >
             <Send className="w-4 h-4" />
             <span>Send</span>

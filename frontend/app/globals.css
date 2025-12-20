@@ -1,35 +1,136 @@
 @import "tailwindcss";
 
 :root {
-  --background: #f9f8f4;
-  --foreground: #171717;
+  /* 体素艺术风格颜色系统 */
+  --background: #87CEEB; /* 天空蓝 */
+  --foreground: #2C2C2C; /* 深灰 */
+  --sky-blue: #87CEEB;
+  --orange: #FF8C42;
+  --orange-dark: #D2691E;
+  --red: #FF4444;
+  --red-dark: #CC3333;
+  --gray-light: #E0E0E0;
+  --gray-medium: #C0C0C0;
+  --gray-dark: #808080;
+  --white: #FFFFFF;
+  --black: #1A1A1A;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --color-cream: #f9f8f4;
-  --color-primary: #3e6145;
-  --color-primary-dark: #4a5a28;
-  --color-sidebar: #f5f7f3;
-  --color-content: #fcfbf9;
+  --color-sky-blue: var(--sky-blue);
+  --color-orange: var(--orange);
+  --color-orange-dark: var(--orange-dark);
+  --color-red: var(--red);
+  --color-red-dark: var(--red-dark);
+  --color-gray-light: var(--gray-light);
+  --color-gray-medium: var(--gray-medium);
+  --color-gray-dark: var(--gray-dark);
+  --color-primary: var(--orange);
+  --color-primary-dark: var(--orange-dark);
+  --color-sidebar: var(--gray-light);
+  --color-content: var(--sky-blue);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
 body {
-  background: #f9f8f4;
-  color: #171717;
+  background: var(--sky-blue);
+  color: var(--foreground);
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
     "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  image-rendering: pixelated;
+  image-rendering: -moz-crisp-edges;
+  image-rendering: crisp-edges;
+}
+
+/* 体素风格工具类 */
+.voxel-border {
+  border: 3px solid var(--black);
+  box-shadow: 
+    4px 4px 0px 0px var(--gray-dark),
+    8px 8px 0px 0px var(--black);
+}
+
+.voxel-button {
+  border: 3px solid var(--black);
+  box-shadow: 
+    2px 2px 0px 0px var(--gray-dark),
+    4px 4px 0px 0px var(--black);
+  transition: all 0.1s ease;
+}
+
+.voxel-button:hover {
+  transform: translate(2px, 2px);
+  box-shadow: 
+    1px 1px 0px 0px var(--gray-dark),
+    2px 2px 0px 0px var(--black);
+}
+
+.voxel-button:active {
+  transform: translate(4px, 4px);
+  box-shadow: none;
+}
+
+.voxel-card {
+  border: 3px solid var(--black);
+  box-shadow: 
+    4px 4px 0px 0px var(--gray-dark),
+    8px 8px 0px 0px var(--black);
+  background: var(--white);
+}
+
+.voxel-input {
+  border: 3px solid var(--black);
+  box-shadow: 
+    2px 2px 0px 0px var(--gray-dark),
+    4px 4px 0px 0px var(--black);
+}
+
+.voxel-input:focus {
+  outline: none;
+  transform: translate(2px, 2px);
+  box-shadow: 
+    1px 1px 0px 0px var(--gray-dark),
+    2px 2px 0px 0px var(--black);
+}
+
+/* 像素化云朵装饰 */
+.voxel-cloud {
+  background: var(--gray-light);
+  border: 2px solid var(--black);
+  position: relative;
+}
+
+.voxel-cloud::before,
+.voxel-cloud::after {
+  content: '';
+  position: absolute;
+  background: var(--gray-light);
+  border: 2px solid var(--black);
+}
+
+/* 体素风格边框工具类 */
+.border-3 {
+  border-width: 3px;
+}
+
+.border-t-3 {
+  border-top-width: 3px;
+}
+
+.border-r-3 {
+  border-right-width: 3px;
+}
+
+.border-b-3 {
+  border-bottom-width: 3px;
+}
+
+.border-l-3 {
+  border-left-width: 3px;
 }

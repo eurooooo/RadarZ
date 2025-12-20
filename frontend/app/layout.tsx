@@ -25,12 +25,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="zh-CN">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
+      <body className={`${geistSans.variable} ${geistMono.variable}`}>
         <div className="min-h-screen flex">
           <LeftSidebar />
-          <main className="flex-1 ml-60 min-h-screen bg-content">
+          <main className="flex-1 ml-60 min-h-screen bg-sky-blue">
             {children}
           </main>
         </div>

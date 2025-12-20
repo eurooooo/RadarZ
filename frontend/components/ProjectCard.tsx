@@ -25,19 +25,26 @@ export default function ProjectCard({
 }: ProjectCardProps) {
   return (
     <Link href={`/project/${id}`} className="block">
-      <div className="border border-gray-200 rounded-lg hover:shadow-md transition-all cursor-pointer overflow-hidden p-6 flex flex-col h-full">
+      <div className="voxel-card cursor-pointer overflow-hidden p-6 flex flex-col h-full hover:translate-x-1 hover:translate-y-1 transition-transform">
         {/* Header */}
         <div className="mb-3">
-          <h2 className="text-xl font-bold text-primary mb-2">{title}</h2>
+          <h2
+            className="text-xl font-bold text-black mb-2"
+            style={{ textShadow: "2px 2px 0px #808080" }}
+          >
+            {title}
+          </h2>
           <div className="flex items-start gap-2 mb-3">
-            <Image
-              src={`https://github.com/${authors}.png`}
-              alt={authors}
-              width={20}
-              height={20}
-              className="rounded-full self-start mt-0.5"
-            />
-            <p className="text-sm text-gray-600 font-semibold">{authors}</p>
+            <div className="voxel-border p-1 bg-white">
+              <Image
+                src={`https://github.com/${authors}.png`}
+                alt={authors}
+                width={20}
+                height={20}
+                className="block"
+              />
+            </div>
+            <p className="text-sm text-black font-bold">{authors}</p>
           </div>
         </div>
 
@@ -46,7 +53,7 @@ export default function ProjectCard({
           {tags.map((tag, index) => (
             <span
               key={index}
-              className="px-2.5 py-1 text-gray-700 text-xs rounded-full border border-gray-300 bg-gray-50"
+              className="voxel-button px-3 py-1 text-black text-xs bg-gray-light font-semibold"
             >
               {tag}
             </span>
@@ -54,31 +61,33 @@ export default function ProjectCard({
         </div>
 
         {/* Description */}
-        <p className="text-gray-700 text-sm mb-4 line-clamp-3 flex-1">
+        <p className="text-black text-sm mb-4 line-clamp-3 flex-1 font-medium">
           {description}
         </p>
 
         {/* Action Bar */}
-        <div className="flex items-center gap-4 pt-3 border-t border-gray-200">
+        <div className="flex items-center gap-4 pt-3 border-t-3 border-black">
           {language && (
-            <div className="flex items-center gap-1.5 text-sm text-gray-600 font-normal">
+            <div className="flex items-center gap-1.5 text-sm text-black font-bold">
               <span
-                className="w-3 h-3 rounded-full"
+                className="w-4 h-4 voxel-border"
                 style={{ backgroundColor: getLanguageColor(language) }}
               />
               {language}
             </div>
           )}
-          <div className="flex items-center gap-1.5 text-gray-600">
+          <div className="flex items-center gap-1.5 text-black font-bold">
             <Star className="w-4 h-4" />
             <span className="text-sm">{stars}</span>
           </div>
-          <div className="flex items-center gap-1.5 text-gray-600">
+          <div className="flex items-center gap-1.5 text-black font-bold">
             <GitFork className="w-4 h-4" />
             <span className="text-sm">{forks}</span>
           </div>
-          <div className="flex items-center gap-1.5 text-gray-600 ml-auto">
-            <Bookmark className="w-4 h-4" />
+          <div className="flex items-center gap-1.5 text-black ml-auto">
+            <div className="voxel-button p-1.5 bg-orange">
+              <Bookmark className="w-4 h-4 text-white" />
+            </div>
           </div>
         </div>
       </div>

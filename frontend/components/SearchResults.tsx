@@ -11,14 +11,16 @@ interface SearchResultsProps {
 export default function SearchResults({ state }: SearchResultsProps) {
   return (
     <>
-      <div className="text-sm text-gray-600 mb-6">
+      <div className="text-sm text-black mb-6 font-bold">
         总计：{state.projects.length}
       </div>
 
       {/* Results */}
       {state.isSearching && state.projects.length === 0 && (
         <div className="flex items-center justify-center py-12">
-          <Loader2 className="w-8 h-8 animate-spin text-primary" />
+          <div className="voxel-border bg-orange p-4">
+            <Loader2 className="w-8 h-8 animate-spin text-white" />
+          </div>
         </div>
       )}
 
@@ -28,7 +30,7 @@ export default function SearchResults({ state }: SearchResultsProps) {
             <div key={project.id} className="relative">
               <ProjectCard {...project} />
               {project.validation_reason && (
-                <div className="absolute top-2 right-2 bg-green-100 text-green-800 px-2 py-1 rounded text-xs flex items-center gap-1">
+                <div className="absolute top-4 right-4 voxel-button bg-orange text-white px-3 py-2 text-xs flex items-center gap-1 font-bold">
                   <Check className="w-3 h-3" />
                   完美匹配
                 </div>
@@ -39,7 +41,7 @@ export default function SearchResults({ state }: SearchResultsProps) {
       )}
 
       {state.isComplete && state.projects.length === 0 && (
-        <div className="text-center py-12 text-gray-500">
+        <div className="text-center py-12 text-black font-bold">
           未找到符合您条件的项目。
         </div>
       )}

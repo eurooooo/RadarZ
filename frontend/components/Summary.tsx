@@ -14,7 +14,7 @@ async function Summary({ slug }: { slug: string }) {
 
   if (!res.ok) {
     return (
-      <div className="h-screen bg-red-50 border border-red-200 rounded-lg flex items-center justify-center px-6 text-red-600">
+      <div className="voxel-card p-6 bg-red flex items-center justify-center text-white font-bold">
         加载摘要失败: {res.status}
       </div>
     );
@@ -22,8 +22,8 @@ async function Summary({ slug }: { slug: string }) {
 
   const data = (await res.json()) as SummaryResponse;
   return (
-    <div className="h-screen border border-gray-200 rounded-lg p-6 bg-white">
-      <pre className="whitespace-pre-wrap text-sm text-gray-800 leading-6">
+    <div className="voxel-card p-6 bg-white">
+      <pre className="whitespace-pre-wrap text-sm text-black leading-6 font-medium">
         {data.summary}
       </pre>
     </div>
