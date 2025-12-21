@@ -39,7 +39,7 @@ export default function SearchContainer({
 
       {/* Right Sidebar - Working Flow */}
       <div className="w-80 bg-white border-l border-gray-200 p-6 overflow-y-auto">
-        <h2 className="text-lg font-semibold mb-4">工作流程</h2>
+        <h2 className="text-base font-semibold mb-4">工作流程</h2>
         <WorkingFlow state={state} />
       </div>
     </div>

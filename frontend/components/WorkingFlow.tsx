@@ -9,87 +9,81 @@ interface WorkingFlowProps {
 
 export default function WorkingFlow({ state }: WorkingFlowProps) {
   return (
-    <>
+    <div className="space-y-3">
       {/* Summary Stats */}
-      <div className="mb-6 space-y-2 text-sm">
-        <div className="flex justify-between">
+      <div className="flex items-center gap-4 text-xs">
+        <div className="flex items-center gap-2">
           <span className="text-gray-600">总项目数：</span>
-          <span className="font-medium">{state.searchProgress}</span>
+          <span className="font-medium text-gray-900">
+            {state.searchProgress}
+          </span>
         </div>
-        <div className="flex justify-between">
-          <span className="text-gray-600">已验证项目：</span>
-          <span className="font-medium">{state.projects.length}</span>
+        <div className="flex items-center gap-2">
+          <span className="text-gray-600">已验证：</span>
+          <span className="font-medium text-gray-900">
+            {state.projects.length}
+          </span>
         </div>
       </div>
 
-      {/* Step 1: Analysing Questions */}
-      <div className="mb-4">
-        <div className="flex items-center gap-2 mb-2">
+      {/* Steps */}
+      <div className="flex items-center gap-4 flex-wrap">
+        {/* Step 1: Analysing Questions */}
+        <div className="flex items-center gap-2">
           <Check
-            className={`w-5 h-5 ${
+            className={`w-4 h-4 ${
               state.searchQueries.length > 0
                 ? "text-green-500"
                 : "text-gray-300"
             }`}
           />
-          <span className="font-medium">1 分析问题</span>
+          <span className="text-xs font-medium text-gray-700">分析问题</span>
+          {state.searchQueries.length > 0 && (
+            <span className="text-[10px] text-gray-500">
+              ({state.searchQueries.length})
+            </span>
+          )}
         </div>
-        {state.searchQueries.length > 0 && (
-          <div className="ml-7 space-y-1">
-            {state.searchQueries.map((query, index) => (
-              <div key={index} className="text-sm text-gray-700">
-                # {query}
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
 
-      {/* Step 2: Validating Criteria */}
-      <div className="mb-4">
-        <div className="flex items-center gap-2 mb-2">
+        {/* Step 2: Validating Criteria */}
+        <div className="flex items-center gap-2">
           <Check
-            className={`w-5 h-5 ${
+            className={`w-4 h-4 ${
               state.validatingCriteria ? "text-green-500" : "text-gray-300"
             }`}
           />
-          <span className="font-medium">2 验证标准</span>
+          <span className="text-xs font-medium text-gray-700">验证标准</span>
         </div>
-        {state.validatingCriteria && (
-          <div className="ml-7 text-sm text-gray-700">
-            # {state.validatingCriteria}
-          </div>
-        )}
-      </div>
 
-      {/* Step 3: Searching & Validating */}
-      <div className="mb-4">
-        <div className="flex items-center gap-2 mb-2">
+        {/* Step 3: Searching & Validating */}
+        <div className="flex items-center gap-2">
           <Check
-            className={`w-5 h-5 ${
+            className={`w-4 h-4 ${
               state.projects.length > 0 ? "text-green-500" : "text-gray-300"
             }`}
           />
-          <span className="font-medium">3 搜索与验证</span>
+          <span className="text-xs font-medium text-gray-700">搜索验证</span>
+          {state.projects.length > 0 && (
+            <span className="text-[10px] text-gray-500">
+              ({state.projects.length})
+            </span>
+          )}
         </div>
-        {state.projects.length > 0 && (
-          <div className="ml-7 space-y-2">
-            {state.projects.slice(0, 5).map((project) => (
-              <div key={project.id} className="flex items-center gap-2">
-                <Check className="w-4 h-4 text-green-500" />
-                <span className="text-sm text-gray-700 line-clamp-1">
-                  {project.title}
-                </span>
-              </div>
-            ))}
-            {state.projects.length > 5 && (
-              <div className="text-xs text-gray-500">
-                +{state.projects.length - 5} 更多
-              </div>
-            )}
-          </div>
-        )}
       </div>
-    </>
+
+      {/* Search Queries (if any) */}
+      {state.searchQueries.length > 0 && (
+        <div className="flex flex-wrap gap-2 pt-2 border-t border-gray-200">
+          {state.searchQueries.map((query, index) => (
+            <span
+              key={index}
+              className="px-2 py-1 bg-gray-100 text-gray-700 rounded text-[10px]"
+            >
+              #{query}
+            </span>
+          ))}
+        </div>
+      )}
+    </div>
   );
 }

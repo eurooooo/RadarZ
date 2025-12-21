@@ -32,7 +32,7 @@ async function ProjectsList() {
   const projects = await fetchProjects();
 
   if (projects.length === 0) {
-    return <p className="text-sm text-gray-500">未找到项目。</p>;
+    return <p className="text-xs text-gray-500">未找到项目。</p>;
   }
 
   return (
@@ -47,7 +47,7 @@ async function ProjectsList() {
 export default function ExploreProjects() {
   return (
     <div>
-      <h1 className="text-2xl font-bold text-primary mb-6">探索项目</h1>
+      <h1 className="text-xl font-bold text-primary mb-6">探索项目</h1>
 
       <Suspense
         fallback={

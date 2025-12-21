@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { Sparkles } from "lucide-react";
+import { Sparkles, Search as SearchIcon, ArrowRight } from "lucide-react";
+import ExampleSearches from "./ExampleSearches";
 
 interface SearchBarProps {
   onSend: (query: string) => void;
@@ -16,84 +17,60 @@ export default function SearchBar({ onSend }: SearchBarProps) {
     }
   };
 
-  const promptSuggestions = [
-    { label: "AI 智能体" },
-    { label: "Web 开发" },
-    { label: "大语言模型" },
-    { label: "聊天机器人" },
-    { label: "机器学习" },
-  ];
+  const handleExampleSearch = (query: string) => {
+    setInputValue(query);
+    onSend(query);
+  };
 
   return (
-    <div className="flex flex-col items-center justify-center w-full h-full min-h-screen px-6 py-8 relative">
-      {/* Gradient Background */}
-      <div className="absolute top-0 left-0 right-0 h-80 bg-gradient-to-b from-primary/15 via-primary/8 to-transparent pointer-events-none" />
-
-      {/* Content */}
-      <div className="relative z-10 w-full max-w-4xl">
-        {/* Greeting */}
-        <div className="mb-8 text-center">
-          <div className="mb-4 flex items-center justify-center gap-3">
-            <Sparkles className="w-10 h-10 text-primary" />
-            <h1 className="text-4xl font-serif text-foreground">搜索灵感</h1>
+    <div className="flex flex-col items-center justify-start w-full p-8 max-w-6xl mx-auto">
+      <div className="w-full flex flex-col items-center">
+        {/* Title Section */}
+        <div className="flex items-center gap-3 mb-4">
+          <div className="p-2 bg-primary/5 rounded-xl text-primary">
+            <Sparkles size={28} className="animate-pulse" />
           </div>
-          <p className="text-base text-gray-600 max-w-2xl mx-auto">
-            智能分析您的搜索需求，精准推荐符合标准的 GitHub
-            项目，如特定技术栈或功能特性。
-          </p>
+          <h2 className="text-3xl font-bold text-gray-900 tracking-tight">
+            搜索灵感
+          </h2>
         </div>
 
-        {/* Main Search Container */}
-        <div className="w-full">
-          <div className="bg-white rounded-full shadow-sm border border-gray-100 px-4 py-3 mb-6 flex items-center gap-3">
-            {/* Input Area */}
-            <input
-              type="text"
-              value={inputValue}
-              onChange={(e) => setInputValue(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" && !e.shiftKey) {
-                  e.preventDefault();
-                  handleSend();
-                }
-              }}
-              placeholder="搜索项目..."
-              className="flex-1 text-lg text-foreground placeholder:text-gray-400 bg-transparent border-none outline-none focus:outline-none"
-            />
+        {/* Description */}
+        <p className="text-gray-500 text-base text-center max-w-xl mb-12 leading-relaxed">
+          智能分析您的搜索需求，精准推荐符合标准的 GitHub
+          项目，如特定技术栈或功能特性。
+        </p>
 
-            {/* Send Button */}
-            <button
-              onClick={handleSend}
-              disabled={!inputValue.trim()}
-              className="w-10 h-10 rounded-full bg-primary flex items-center justify-center hover:bg-primary-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed shrink-0"
-            >
-              <svg
-                className="w-5 h-5 text-white"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M13 7l5 5m0 0l-5 5m5-5H6"
-                />
-              </svg>
-            </button>
+        {/* Search Form */}
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            handleSend();
+          }}
+          className="w-full max-w-2xl relative mb-8 group"
+        >
+          <div className="absolute left-6 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-primary transition-colors">
+            <SearchIcon size={20} />
           </div>
+          <input
+            type="text"
+            value={inputValue}
+            onChange={(e) => setInputValue(e.target.value)}
+            placeholder="搜索项目，如 'Next.js 仪表盘模板'..."
+            className="w-full pl-14 pr-16 py-5 bg-white border border-gray-100 rounded-full text-base shadow-sm focus:outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary/30 transition-all placeholder:text-gray-300"
+          />
+          <button
+            type="submit"
+            disabled={!inputValue.trim()}
+            className="absolute right-3 top-1/2 -translate-y-1/2 p-3 bg-primary text-white rounded-full hover:bg-primary-dark hover:scale-105 active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-primary/20"
+          >
+            <ArrowRight size={22} />
+          </button>
+        </form>
 
-          {/* Prompt Suggestions */}
-          <div className="flex items-center justify-center gap-3 flex-wrap">
-            {promptSuggestions.map((prompt, index) => (
-              <button
-                key={index}
-                className="px-4 py-2 rounded-full bg-white border border-gray-200 text-sm text-gray-700 hover:bg-gray-50 transition-colors flex items-center gap-2"
-              >
-                <span>{prompt.label}</span>
-              </button>
-            ))}
-          </div>
+        {/* Example Searches */}
+        <div className="w-full mt-8">
+          <ExampleSearches onSearch={handleExampleSearch} />
         </div>
       </div>
     </div>

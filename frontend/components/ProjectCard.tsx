@@ -24,11 +24,11 @@ export default function ProjectCard({
   language,
 }: ProjectCardProps) {
   return (
-    <Link href={`/project/${id}`} className="block">
+    <Link href={`/project/${id}`} className="block h-full">
       <div className="border border-gray-200 rounded-lg hover:shadow-md transition-all cursor-pointer overflow-hidden p-6 flex flex-col h-full">
         {/* Header */}
         <div className="mb-3">
-          <h2 className="text-xl font-bold text-primary mb-2">{title}</h2>
+          <h2 className="text-lg font-bold text-primary mb-2">{title}</h2>
           <div className="flex items-start gap-2 mb-3">
             <Image
               src={`https://github.com/${authors}.png`}
@@ -37,7 +37,7 @@ export default function ProjectCard({
               height={20}
               className="rounded-full self-start mt-0.5"
             />
-            <p className="text-sm text-gray-600 font-semibold">{authors}</p>
+            <p className="text-xs text-gray-600 font-semibold">{authors}</p>
           </div>
         </div>
 
@@ -46,7 +46,7 @@ export default function ProjectCard({
           {tags.map((tag, index) => (
             <span
               key={index}
-              className="px-2.5 py-1 text-gray-700 text-xs rounded-full border border-gray-300 bg-gray-50"
+              className="px-2.5 py-1 text-gray-700 text-[10px] rounded-full border border-gray-300 bg-gray-50"
             >
               {tag}
             </span>
@@ -54,14 +54,14 @@ export default function ProjectCard({
         </div>
 
         {/* Description */}
-        <p className="text-gray-700 text-sm mb-4 line-clamp-3 flex-1">
+        <p className="text-gray-700 text-xs mb-4 line-clamp-3 flex-1">
           {description}
         </p>
 
         {/* Action Bar */}
         <div className="flex items-center gap-4 pt-3 border-t border-gray-200">
           {language && (
-            <div className="flex items-center gap-1.5 text-sm text-gray-600 font-normal">
+            <div className="flex items-center gap-1.5 text-xs text-gray-600 font-normal">
               <span
                 className="w-3 h-3 rounded-full"
                 style={{ backgroundColor: getLanguageColor(language) }}
@@ -71,11 +71,11 @@ export default function ProjectCard({
           )}
           <div className="flex items-center gap-1.5 text-gray-600">
             <Star className="w-4 h-4" />
-            <span className="text-sm">{stars}</span>
+            <span className="text-xs">{stars}</span>
           </div>
           <div className="flex items-center gap-1.5 text-gray-600">
             <GitFork className="w-4 h-4" />
-            <span className="text-sm">{forks}</span>
+            <span className="text-xs">{forks}</span>
           </div>
           <div className="flex items-center gap-1.5 text-gray-600 ml-auto">
             <Bookmark className="w-4 h-4" />
@@ -85,7 +85,6 @@ export default function ProjectCard({
     </Link>
   );
 }
-
 // GitHub 语言颜色映射
 const getLanguageColor = (language: string | null): string => {
   if (!language) return "#586e75";

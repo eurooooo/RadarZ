@@ -1,5 +1,4 @@
 import ProjectViewer from "@/components/ProjectViewer";
-import AIAssistant from "@/components/AIAssistant";
 
 interface PageProps {
   params: Promise<{
@@ -14,7 +13,6 @@ export default async function ProjectDetailPage({ params }: PageProps) {
   return (
     <>
       <ProjectViewer slug={slug} />
-      <AIAssistant />
     </>
   );
 }

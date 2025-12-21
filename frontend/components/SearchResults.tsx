@@ -1,6 +1,5 @@
 "use client";
 
-import { Check, Loader2 } from "lucide-react";
 import ProjectCard from "./ProjectCard";
 import { SearchState } from "@/hooks/useSearch";
 
@@ -11,38 +10,42 @@ interface SearchResultsProps {
 export default function SearchResults({ state }: SearchResultsProps) {
   return (
     <>
-      <div className="text-sm text-gray-600 mb-6">
-        总计：{state.projects.length}
-      </div>
-
-      {/* Results */}
+      {/* Loading State */}
       {state.isSearching && state.projects.length === 0 && (
-        <div className="flex items-center justify-center py-12">
-          <Loader2 className="w-8 h-8 animate-spin text-primary" />
-        </div>
-      )}
-
-      {state.projects.length > 0 && (
-        <div className="space-y-4">
-          {state.projects.map((project) => (
-            <div key={project.id} className="relative">
-              <ProjectCard {...project} />
-              {project.validation_reason && (
-                <div className="absolute top-2 right-2 bg-green-100 text-green-800 px-2 py-1 rounded text-xs flex items-center gap-1">
-                  <Check className="w-3 h-3" />
-                  完美匹配
-                </div>
-              )}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {[1, 2, 3, 4, 5, 6].map((i) => (
+            <div
+              key={i}
+              className="h-64 bg-white rounded-2xl border border-gray-100 animate-pulse flex flex-col p-6 space-y-4"
+            >
+              <div className="w-1/3 h-4 bg-gray-100 rounded"></div>
+              <div className="w-full h-6 bg-gray-100 rounded"></div>
+              <div className="w-full h-24 bg-gray-50 rounded"></div>
+              <div className="mt-auto w-1/2 h-4 bg-gray-100 rounded"></div>
             </div>
           ))}
         </div>
       )}
 
-      {state.isComplete && state.projects.length === 0 && (
-        <div className="text-center py-12 text-gray-500">
-          未找到符合您条件的项目。
+      {/* Results Grid */}
+      {state.projects.length > 0 && (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pb-20 auto-rows-fr">
+          {state.projects.map((project) => (
+            <div key={project.id} className="relative h-full">
+              <ProjectCard {...project} />
+            </div>
+          ))}
         </div>
       )}
+
+      {/* Empty State */}
+      {state.isComplete &&
+        state.projects.length === 0 &&
+        !state.isSearching && (
+          <div className="text-center py-12 text-gray-500">
+            未找到符合您条件的项目。
+          </div>
+        )}
     </>
   );
 }
