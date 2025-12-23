@@ -31,14 +31,14 @@ export default function SearchBar({ onSend }: SearchBarProps) {
             <Sparkles size={28} className="animate-pulse" />
           </div>
           <h2 className="text-3xl font-bold text-gray-900 tracking-tight">
-            搜索灵感
+            搜索项目
           </h2>
         </div>
 
         {/* Description */}
         <p className="text-gray-500 text-base text-center max-w-xl mb-12 leading-relaxed">
-          智能分析您的搜索需求，精准推荐符合标准的 GitHub
-          项目，如特定技术栈或功能特性。
+          智能分析您的搜索需求，精准推荐符合技术栈、功能特性或质量标准的 GitHub
+          项目。
         </p>
 
         {/* Search Form */}

@@ -25,7 +25,9 @@ export default function RootLayout({
       <body className={`${inter.variable} antialiased`}>
         <div className="min-h-screen flex">
           <LeftSidebar />
-          <main className="flex-1 min-h-screen bg-content">{children}</main>
+          <main className="flex-1 min-h-screen bg-content bg-content-gradient">
+            {children}
+          </main>
         </div>
       </body>
     </html>

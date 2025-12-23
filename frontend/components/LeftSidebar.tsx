@@ -14,7 +14,7 @@ export default function LeftSidebar() {
   ];
 
   return (
-    <aside className="w-64 border-r border-gray-100 h-screen flex flex-col bg-white sticky top-0 overflow-y-auto shrink-0">
+    <aside className="w-64 border-r border-gray-100 h-screen flex flex-col bg-sidebar-gradient sticky top-0 overflow-y-auto shrink-0">
       {/* Logo */}
       <div className="p-6 mb-8 flex items-center gap-2">
         <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center text-white">
