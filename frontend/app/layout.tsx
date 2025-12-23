@@ -23,9 +23,9 @@ export default function RootLayout({
   return (
     <html lang="zh-CN">
       <body className={`${inter.variable} antialiased`}>
-        <div className="min-h-screen flex">
+        <div className="flex h-screen w-full bg-[#f8faf9] overflow-hidden">
           <LeftSidebar />
-          <main className="flex-1 min-h-screen bg-content bg-content-gradient">
+          <main className="flex-1 flex flex-col relative overflow-y-auto">
             {children}
           </main>
         </div>

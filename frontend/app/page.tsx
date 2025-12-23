@@ -1,11 +1,12 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useRef } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import SearchBar from "@/components/SearchBar";
 import SearchResults from "@/components/SearchResults";
 import WorkingFlow from "@/components/WorkingFlow";
 import { useSearch } from "@/hooks/useSearch";
-import { RefreshCw } from "lucide-react";
+import { ChevronLeft } from "lucide-react";
 
 export default function Home() {
   const [hasSearched, setHasSearched] = useState(false);
@@ -38,47 +39,70 @@ export default function Home() {
     }
   };
 
+  // 返回搜索
+  const handleBack = () => {
+    setHasSearched(false);
+    setSearchQuery("");
+  };
+
   return (
-    <div className="flex flex-col items-center justify-start min-h-screen p-8 max-w-6xl mx-auto w-full">
-      <div
-        className={`w-full flex flex-col items-center transition-all duration-700 ${
-          hasSearched ? "mt-4" : "mt-[15vh]"
-        }`}
-      >
-        <SearchBar onSend={handleSend} />
-      </div>
+    <div className="flex-1 flex flex-col relative overflow-y-auto">
+      <AnimatePresence mode="wait">
+        {!hasSearched ? (
+          <motion.div
+            key="search-home"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            className="flex-1"
+          >
+            <SearchBar onSend={handleSend} />
+          </motion.div>
+        ) : (
+          <motion.div
+            key="results-view"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            ref={resultsRef}
+            className="flex-1 p-8"
+          >
+            <div className="max-w-5xl mx-auto">
+              {/* Back Button */}
+              <div className="mb-8 flex items-center justify-between">
+                <button
+                  onClick={handleBack}
+                  className="flex items-center gap-2 text-gray-500 hover:text-emerald-600 transition-colors font-medium group cursor-pointer"
+                >
+                  <ChevronLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
+                  返回搜索
+                </button>
+              </div>
 
-      {hasSearched && (
-        <div
-          ref={resultsRef}
-          className="w-full mt-12 animate-in fade-in slide-in-from-bottom-8 duration-700"
-        >
-          {/* Header with WorkingFlow */}
-          <div className="mb-8 border-b border-gray-100 pb-4">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-xl font-bold text-gray-900">推荐项目</h3>
-              <button
-                onClick={handleRefresh}
-                disabled={state.isSearching}
-                className="flex items-center gap-2 text-xs font-medium text-gray-500 hover:text-primary transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <RefreshCw
-                  size={14}
-                  className={state.isSearching ? "animate-spin" : ""}
-                />
-                重新推荐
-              </button>
-            </div>
-            {/* Compact WorkingFlow */}
-            <div className="bg-gray-50 rounded-lg p-3 border border-gray-100">
-              <WorkingFlow state={state} />
-            </div>
-          </div>
+              {/* Header with Search Query */}
+              <header className="mb-10">
+                <h2 className="text-gray-400 text-sm font-bold uppercase tracking-widest mb-2">
+                  搜索关键词
+                </h2>
+                <h1 className="text-3xl font-bold text-gray-800">
+                  "{searchQuery}"
+                </h1>
+              </header>
 
-          {/* Search Results */}
-          <SearchResults state={state} />
-        </div>
-      )}
+              {/* Header with WorkingFlow */}
+              <div className="mb-8 border-b border-gray-100/50 pb-6">
+                {/* Enhanced WorkingFlow with glassmorphism */}
+                <div className="relative rounded-2xl bg-gradient-to-br from-white/80 via-emerald-50/30 to-white/80 backdrop-blur-md p-6 border border-emerald-100/50 shadow-xl shadow-emerald-500/5">
+                  <WorkingFlow state={state} />
+                </div>
+              </div>
+
+              {/* Search Results */}
+              <SearchResults state={state} />
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

@@ -1,5 +1,4 @@
-const BACKEND_BASE_URL =
-  process.env.NEXT_PUBLIC_BACKEND_BASE_URL ?? "http://127.0.0.1:8000";
+import { BACKEND_BASE_URL } from "@/lib/config";
 
 interface SummaryResponse {
   repo: string | null;
@@ -14,7 +13,7 @@ async function Summary({ slug }: { slug: string }) {
 
   if (!res.ok) {
     return (
-      <div className="h-screen bg-red-50 border border-red-200 rounded-lg flex items-center justify-center px-6 text-red-600">
+      <div className="bg-red-50 border border-red-200 rounded-2xl flex items-center justify-center px-6 py-12 text-red-600">
         加载摘要失败: {res.status}
       </div>
     );
@@ -22,8 +21,8 @@ async function Summary({ slug }: { slug: string }) {
 
   const data = (await res.json()) as SummaryResponse;
   return (
-    <div className="h-screen border border-gray-200 rounded-lg p-6 bg-white">
-      <pre className="whitespace-pre-wrap text-sm text-gray-800 leading-6">
+    <div className="border border-gray-100 rounded-2xl p-6 bg-white shadow-sm">
+      <pre className="whitespace-pre-wrap text-sm text-gray-700 leading-relaxed">
         {data.summary}
       </pre>
     </div>

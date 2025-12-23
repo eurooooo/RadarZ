@@ -1,20 +1,8 @@
 import { Suspense } from "react";
 import ProjectCard from "./ProjectCard";
 import ProjectCardSkeleton from "./ProjectCardSkeleton";
-
-const BACKEND_BASE_URL =
-  process.env.NEXT_PUBLIC_BACKEND_BASE_URL ?? "http://127.0.0.1:8000";
-
-export interface Project {
-  id: string;
-  title: string;
-  authors: string;
-  description: string;
-  tags: string[];
-  stars: number;
-  forks: number;
-  language?: string | null;
-}
+import { Project } from "@/hooks/useSearch";
+import { BACKEND_BASE_URL } from "@/lib/config";
 
 async function fetchProjects(): Promise<Project[]> {
   const res = await fetch(`${BACKEND_BASE_URL}/projects`, {
@@ -47,7 +35,7 @@ async function ProjectsList() {
 export default function ExploreProjects() {
   return (
     <div>
-      <h1 className="text-xl font-bold text-primary mb-6">探索项目</h1>
+      <h1 className="text-xl font-bold text-gray-800 mb-6">探索项目</h1>
 
       <Suspense
         fallback={

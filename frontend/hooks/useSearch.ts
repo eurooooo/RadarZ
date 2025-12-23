@@ -1,4 +1,5 @@
 import { useState, useCallback } from "react";
+import { BACKEND_BASE_URL } from "@/lib/config";
 
 export interface Project {
   id: string;
@@ -45,7 +46,7 @@ export function useSearch() {
 
     try {
       const response = await fetch(
-        `http://localhost:8000/search?user_input=${encodeURIComponent(query)}`
+        `${BACKEND_BASE_URL}/search?user_input=${encodeURIComponent(query)}`
       );
 
       if (!response.ok) {
@@ -85,10 +86,26 @@ export function useSearch() {
                   searchProgress: data.data.total,
                 }));
               } else if (data.type === "project") {
-                setState((prev) => ({
-                  ...prev,
-                  projects: [...prev.projects, data.data],
-                }));
+                setState((prev) => {
+                  // 检查是否已存在，避免重复添加
+                  const exists = prev.projects.some(
+                    (p) => p.id === data.data.id
+                  );
+                  if (exists) {
+                    console.log("Project already exists:", data.data.id);
+                    return prev;
+                  }
+                  console.log(
+                    "Adding project:",
+                    data.data.id,
+                    "Total:",
+                    prev.projects.length + 1
+                  );
+                  return {
+                    ...prev,
+                    projects: [...prev.projects, data.data],
+                  };
+                });
               } else if (data.type === "complete") {
                 setState((prev) => ({
                   ...prev,

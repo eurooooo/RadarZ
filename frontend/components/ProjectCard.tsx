@@ -1,17 +1,12 @@
+"use client";
+
 import Link from "next/link";
 import Image from "next/image";
+import { motion } from "framer-motion";
 import { Star, GitFork, Bookmark } from "lucide-react";
+import { Project } from "@/hooks/useSearch";
 
-interface ProjectCardProps {
-  id: string;
-  title: string;
-  authors: string;
-  description: string;
-  tags: string[];
-  stars: number;
-  forks: number;
-  language?: string | null;
-}
+type ProjectCardProps = Project;
 
 export default function ProjectCard({
   id,
@@ -25,10 +20,18 @@ export default function ProjectCard({
 }: ProjectCardProps) {
   return (
     <Link href={`/project/${id}`} className="block h-full">
-      <div className="border border-gray-200 rounded-lg hover:shadow-md transition-all cursor-pointer overflow-hidden p-6 flex flex-col h-full">
+      <motion.div
+        whileHover={{ scale: 1.02, borderColor: "#10b981", y: -4 }}
+        transition={{ duration: 0.15, ease: "easeOut" }}
+        className="border border-gray-200 rounded-xl hover:shadow-xl hover:shadow-emerald-500/10 transition-all cursor-pointer overflow-hidden p-6 flex flex-col h-full bg-white/80 backdrop-blur-sm"
+        style={{
+          boxShadow:
+            "0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1)",
+        }}
+      >
         {/* Header */}
         <div className="mb-3">
-          <h2 className="text-lg font-bold text-primary mb-2">{title}</h2>
+          <h2 className="text-lg font-bold text-emerald-600 mb-2">{title}</h2>
           <div className="flex items-start gap-2 mb-3">
             <Image
               src={`https://github.com/${authors}.png`}
@@ -81,7 +84,7 @@ export default function ProjectCard({
             <Bookmark className="w-4 h-4" />
           </div>
         </div>
-      </div>
+      </motion.div>
     </Link>
   );
 }
