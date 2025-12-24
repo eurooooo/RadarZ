@@ -69,12 +69,13 @@ export default function WorkingFlow({ state }: WorkingFlowProps) {
     {
       id: 2,
       label: "验证标准",
-      isActive: state.validatingCriteria !== "",
-      isCompleted: state.validatingCriteria !== "",
+      isActive: state.validateCriteria.length > 0,
+      isCompleted: state.validateCriteria.length > 0,
+      count: state.validateCriteria.length,
       isProcessing:
         state.isSearching &&
         state.searchQueries.length > 0 &&
-        !state.validatingCriteria,
+        state.validateCriteria.length === 0,
     },
     {
       id: 3,
@@ -84,7 +85,7 @@ export default function WorkingFlow({ state }: WorkingFlowProps) {
       count: state.projects.length,
       isProcessing:
         state.isSearching &&
-        state.validatingCriteria !== "" &&
+        state.validateCriteria.length > 0 &&
         state.projects.length === 0,
     },
   ];
@@ -202,6 +203,27 @@ export default function WorkingFlow({ state }: WorkingFlowProps) {
                         className="px-2.5 py-1 bg-gradient-to-r from-emerald-50 to-emerald-100/50 text-emerald-700 rounded-full text-[10px] font-medium border border-emerald-200/50 shadow-sm backdrop-blur-sm"
                       >
                         #{query}
+                      </motion.span>
+                    ))}
+                  </motion.div>
+                )}
+
+                {/* 步骤2下方：验证标准标签 */}
+                {step.id === 2 && state.validateCriteria.length > 0 && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: "auto" }}
+                    className="mt-3 w-full flex flex-wrap gap-2 justify-center"
+                  >
+                    {state.validateCriteria.map((criterion, criterionIndex) => (
+                      <motion.span
+                        key={criterionIndex}
+                        initial={{ opacity: 0, scale: 0.8 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ delay: criterionIndex * 0.1 }}
+                        className="px-2.5 py-1 bg-gradient-to-r from-blue-50 to-blue-100/50 text-blue-700 rounded-full text-[10px] font-medium border border-blue-200/50 shadow-sm backdrop-blur-sm"
+                      >
+                        ✓ {criterion}
                       </motion.span>
                     ))}
                   </motion.div>

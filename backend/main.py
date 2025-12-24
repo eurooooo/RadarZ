@@ -155,6 +155,12 @@ async def search(
                         if search_queries:
                             yield f"data: {json.dumps({'type': 'search_queries', 'data': search_queries}, ensure_ascii=False)}\n\n"
                     
+                    elif node_name == "generate_validate_criteria":
+                        # 发送验证标准
+                        validate_criteria = node_output.get("validate_criteria", [])
+                        if validate_criteria:
+                            yield f"data: {json.dumps({'type': 'validate_criteria', 'data': validate_criteria}, ensure_ascii=False)}\n\n"
+                    
                     elif node_name == "search_github":
                         # 发送搜索进度
                         github_results = node_output.get("github_results", [])

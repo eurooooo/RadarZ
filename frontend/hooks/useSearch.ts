@@ -14,7 +14,7 @@ export interface Project {
 
 export interface SearchState {
   searchQueries: string[];
-  validatingCriteria: string;
+  validateCriteria: string[];
   searchProgress: number;
   projects: Project[];
   isSearching: boolean;
@@ -24,7 +24,7 @@ export interface SearchState {
 export function useSearch() {
   const [state, setState] = useState<SearchState>({
     searchQueries: [],
-    validatingCriteria: "",
+    validateCriteria: [],
     searchProgress: 0,
     projects: [],
     isSearching: false,
@@ -37,7 +37,7 @@ export function useSearch() {
     // 重置状态
     setState({
       searchQueries: [],
-      validatingCriteria: "",
+      validateCriteria: [],
       searchProgress: 0,
       projects: [],
       isSearching: true,
@@ -75,10 +75,10 @@ export function useSearch() {
                   ...prev,
                   searchQueries: data.data,
                 }));
-              } else if (data.type === "validating_criteria") {
+              } else if (data.type === "validate_criteria") {
                 setState((prev) => ({
                   ...prev,
-                  validatingCriteria: data.data,
+                  validateCriteria: data.data,
                 }));
               } else if (data.type === "search_progress") {
                 setState((prev) => ({
