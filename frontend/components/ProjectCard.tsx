@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { Star, GitFork, Bookmark } from "lucide-react";
@@ -18,12 +17,22 @@ export default function ProjectCard({
   forks,
   language,
 }: ProjectCardProps) {
+  const githubUrl = `https://github.com/${id}`;
+
   return (
-    <Link href={`/project/${id}`} className="block h-full">
+    <a
+      href={githubUrl}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="block h-full"
+    >
       <motion.div
-        whileHover={{ scale: 1.02, borderColor: "#10b981", y: -4 }}
+        whileHover={{
+          boxShadow:
+            "0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1), 0 0 8px rgba(16, 185, 129, 0.25), 0 0 16px rgba(16, 185, 129, 0.1)",
+        }}
         transition={{ duration: 0.15, ease: "easeOut" }}
-        className="border border-gray-200 rounded-xl hover:shadow-xl hover:shadow-emerald-500/10 transition-all cursor-pointer overflow-hidden p-6 flex flex-col h-full bg-white/80 backdrop-blur-sm"
+        className="border border-gray-200 rounded-xl transition-all cursor-pointer overflow-hidden p-6 flex flex-col h-full bg-white/80 backdrop-blur-sm"
         style={{
           boxShadow:
             "0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1)",
@@ -85,7 +94,7 @@ export default function ProjectCard({
           </div>
         </div>
       </motion.div>
-    </Link>
+    </a>
   );
 }
 // GitHub 语言颜色映射

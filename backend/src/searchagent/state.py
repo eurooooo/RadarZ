@@ -14,3 +14,11 @@ class ProjectValidationState(TypedDict):
     validate_criteria: List[str]  # 验证标准列表
     user_input: str  # 用户输入
 
+class ProjectValidationProState(TypedDict):
+    """升级版项目验证的状态（支持工具调用）"""
+    repo: Dict[str, Any]  # 单个项目的数据
+    validate_criteria: List[str]  # 验证标准列表
+    user_input: str  # 用户输入
+    messages: Annotated[List[Dict[str, Any]], operator.add]  # LLM 消息历史
+    iteration_count: int  # ReAct 循环迭代次数，用于防止无限循环
+

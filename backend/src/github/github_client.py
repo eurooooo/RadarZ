@@ -271,3 +271,175 @@ class GitHubClient:
             print(f"❌ GitHub 搜索失败: {e}")
             return []
 
+    def get_repo_structure(
+        self, repo_full_name: str, branch: str = "main"
+    ) -> Optional[List[Dict]]:
+        """
+        使用 GitHub Git Trees API 递归获取整个仓库的文件列表
+        
+        Args:
+            repo_full_name: 仓库全名，格式 "owner/repo"
+            branch: 分支名，默认为 "main"
+        
+        Returns:
+            文件列表，每个文件包含 path, type, size 等信息；如果失败则返回 None
+        """
+        if not repo_full_name:
+            return None
+        
+        # 首先获取分支的 SHA
+        try:
+            branch_url = f"https://api.github.com/repos/{repo_full_name}/branches/{branch}"
+            branch_res = requests.get(branch_url, headers=self.headers, timeout=10)
+            if branch_res.status_code == 404:
+                # 尝试其他常见分支名
+                for alt_branch in ["master", "develop"]:
+                    branch_res = requests.get(
+                        f"https://api.github.com/repos/{repo_full_name}/branches/{alt_branch}",
+                        headers=self.headers,
+                        timeout=10
+                    )
+                    if branch_res.status_code == 200:
+                        branch = alt_branch
+                        break
+                else:
+                    return None
+            
+            branch_res.raise_for_status()
+            branch_data = branch_res.json()
+            tree_sha = branch_data["commit"]["sha"]
+        except requests.exceptions.RequestException as e:
+            print(f"❌ 获取分支信息失败 {repo_full_name}: {e}")
+            return None
+        
+        # 获取递归的树结构
+        try:
+            tree_url = f"https://api.github.com/repos/{repo_full_name}/git/trees/{tree_sha}"
+            params = {"recursive": "1"}
+            tree_res = requests.get(tree_url, headers=self.headers, params=params, timeout=30)
+            tree_res.raise_for_status()
+            tree_data = tree_res.json()
+            tree_items = tree_data.get("tree", [])
+            
+            # 优化返回数据，只保留必要字段（path 和 type），减少 token 占用
+            optimized_tree = []
+            for item in tree_items:
+                optimized_tree.append({
+                    "path": item.get("path", ""),
+                    "type": item.get("type", ""),
+                    "size": item.get("size", 0)  # 保留 size 可能有用
+                })
+            
+            return optimized_tree
+        except requests.exceptions.RequestException as e:
+            print(f"❌ 获取仓库结构失败 {repo_full_name}: {e}")
+            return None
+
+    def get_file_content(
+        self, repo_full_name: str, file_path: str, ref: Optional[str] = None
+    ) -> Optional[str]:
+        """
+        使用 GitHub Contents API 读取指定文件的内容
+        
+        Args:
+            repo_full_name: 仓库全名，格式 "owner/repo"
+            file_path: 文件路径（相对于仓库根目录）
+            ref: 分支名或 commit sha（可选，默认为默认分支）
+        
+        Returns:
+            文件内容（纯文本）；如果未找到或失败则返回 None
+        """
+        if not repo_full_name or not file_path:
+            return None
+        
+        api_url = f"https://api.github.com/repos/{repo_full_name}/contents/{file_path}"
+        params = {"ref": ref} if ref else None
+        
+        try:
+            res = requests.get(api_url, headers=self.headers, params=params, timeout=10)
+            if res.status_code == 404:
+                return None
+            res.raise_for_status()
+            data = res.json()
+            
+            # 文件内容默认 base64 编码
+            content = data.get("content")
+            encoding = data.get("encoding")
+            if not content:
+                return None
+            
+            if encoding == "base64":
+                import base64
+                return base64.b64decode(content).decode("utf-8", errors="ignore")
+            
+            return content
+        except requests.exceptions.RequestException as e:
+            print(f"❌ 获取文件内容失败 {repo_full_name}/{file_path}: {e}")
+            return None
+
+    def search_code_in_repo(
+        self, 
+        repo_full_name: str, 
+        keywords: str,
+        limit: int = 10
+    ) -> List[Dict]:
+        """
+        在指定仓库内搜索代码
+        
+        Args:
+            repo_full_name: 仓库全名，格式 "owner/repo"
+            keywords: 搜索关键词（支持 GitHub 代码搜索语法）
+            limit: 返回结果数量限制（最多 100，受 GitHub API 限制）
+        
+        Returns:
+            搜索结果列表，每个结果包含文件路径、代码片段等信息
+        """
+        if not repo_full_name or not keywords:
+            return []
+        
+        url = "https://api.github.com/search/code"
+        
+        # GitHub Code Search API 限制：per_page 最大 100，总结果最多 1000
+        max_per_page = 100
+        max_total_results = 1000
+        actual_limit = min(limit, max_total_results, max_per_page)
+        
+        # 构建搜索查询：keywords + repo:owner/repo
+        query = f"{keywords} repo:{repo_full_name}"
+        
+        try:
+            params = {
+                "q": query,
+                "per_page": actual_limit,
+            }
+            
+            response = requests.get(url, params=params, headers=self.headers, timeout=10)
+            response.raise_for_status()
+            data = response.json()
+            items = data.get("items", [])
+            
+            # 格式化结果，提取关键信息
+            # 注意：GitHub Code Search API 返回的 items 中，repository 可能是简化的对象
+            results = []
+            for item in items[:actual_limit]:
+                # 处理 repository 字段（可能是对象或字符串）
+                repo_info = item.get("repository", {})
+                if isinstance(repo_info, dict):
+                    repo_full = repo_info.get("full_name", repo_full_name)
+                else:
+                    repo_full = repo_full_name
+                
+                results.append({
+                    "path": item.get("path", ""),
+                    "name": item.get("name", ""),
+                    "url": item.get("html_url", ""),
+                    "repository": repo_full,
+                    "score": item.get("score", 0),
+                })
+            
+            return results
+            
+        except requests.exceptions.RequestException as e:
+            print(f"❌ 代码搜索失败 {repo_full_name}: {e}")
+            return []
+
